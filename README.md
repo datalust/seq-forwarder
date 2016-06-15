@@ -1,4 +1,4 @@
-# Seq Forwarder
+# Seq Forwarder [![Build status](https://ci.appveyor.com/api/projects/status/qdvdn50xqwi43jkm/branch/master?svg=true)](https://ci.appveyor.com/project/seqlogs/seq-forwarder/branch/master) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq)
 
 [Seq Forwarder](http://blog.getseq.net/help-us-test-seq-forwarder/) was recently announced. **We're in the process 
 of moving its source code to this repository, which we expect to complete by the end of June 2016.** Until that
@@ -8,6 +8,8 @@ work is complete, things may churn a bit here.
 
 Visual Studio 2015 is required. While migrating from our internal CI no scripted build is set up yet - just build
 the solution in Release mode and grab the resulting binaries.
+
+The solution is currently a Windows-only .NET 4.5.2 application. .NET Core support is intended sometime after its RTM.
 
 ### Debugging
 
@@ -24,50 +26,60 @@ Run `Seq.Forwarder.Administration.exe` to install the forwarder, or check out th
 
 ### Command-line usage
 
-**List available commands**
+**List available commands:**
 
 ```
 seq-forwarder help
 ```
 
-**Get command help**
+**Get command help:**
 
 ```
 seq-forwarder help <command>
 ```
 
-**Install as a Windows service**
+**Install as a Windows service:**
 
 ```
 seq-forwarder install
 ```
 
-**Set destination Seq server details**
+**Set destination Seq server details:**
 
 ```
 seq-forwarder config -k output.serverUrl --value="http://my-seq/"
 seq-forwarder config -k output.apiKey --value="1234567890"
 ```
 
-**Start the Windows service**
+**Start the Windows service:**
 
 ```
 seq-forwarder start
 ```
 
-**Run interactively**
+**Run interactively:**
 
 ```
 seq-forwarder run
 ```
 
-**Change the buffer size cap (defaults to 64 MB)**
+**Change the buffer size cap (defaults to 64 MB):**
 
 ```
 seq-forwarder config -k storage.bufferSizeBytes -v 1073741824  
 seq-forwarder restart  
 ```
 
-### Linux, Mac
+### Logging
 
-.NET Core support is intended sometime after its RTM.
+Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
+the Seq one, so standard client libraries like _Serilog.Sinks.Seq_ can write to
+it directly.
+
+```csharp
+Log.Logger = new LoggerConfiguration()  
+    .WriteTo.Seq("http://localhost:15341")
+    .CreateLogger();
+
+Log.Information("Hello, Seq Forwarder!");  
+```
