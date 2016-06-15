@@ -1,0 +1,12 @@
+﻿<Application x:Class="Seq.Forwarder.Administration.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:administration="clr-namespace:Seq.Forwarder.Administration"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+        <administration:BooleanToBrushConverter x:Key="BooleanToBrushConverter"></administration:BooleanToBrushConverter>
+        <administration:BooleanToButtonBrushConverter x:Key="BooleanToButtonBrushConverter"></administration:BooleanToButtonBrushConverter>
+        <administration:PageVisibilityConverter x:Key="PageVisibilityConverter"></administration:PageVisibilityConverter>
+    </Application.Resources>
+</Application>
