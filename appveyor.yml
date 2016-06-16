@@ -5,3 +5,11 @@ build_script:
 test: off
 artifacts:
 - path: artifacts/*.msi
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: Bo3ypKpKFxinjR9ShkNekNvkob2iklHJU+UlYyfHtcFFIAa58SV2TkEd0xWxz633
+  artifact: SeqForwarder-*.msi
+  prerelease: true
+  on:
+    branch: master
