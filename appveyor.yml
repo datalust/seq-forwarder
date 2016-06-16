@@ -1,7 +1,7 @@
 version: 1.0.{build}
-configuration: Release
-platform: x86
-before_build:
-- cmd: nuget restore
-build:
-  verbosity: minimal
+image: Visual Studio 2015
+build_script:
+- ps: ./Build.ps1
+test: off
+artifacts:
+- path: artifacts/*.msi
