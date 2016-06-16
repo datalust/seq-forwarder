@@ -41,6 +41,8 @@ the solution in Release mode and grab the resulting binaries.
 
 The solution is currently a Windows-only .NET 4.5.2 application. .NET Core support is intended sometime after its RTM.
 
+You will need [Wix 3.10](http://wixtoolset.org) to build the setup/MSI.
+
 ### Debugging
 
 `F5` will work, but you will need to either run the `install` command (see below) to create an HTTP namespace
