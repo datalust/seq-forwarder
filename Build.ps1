@@ -44,7 +44,7 @@ function Publish-Artifacts($version)
 
 Push-Location $PSScriptRoot
 
-$version = @{ $true = $env:APPVEYOR_BUILD_NUMBER; $false = "0.0.0" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
+$version = @{ $true = $env:APPVEYOR_BUILD_VERSION; $false = "0.0.0" }[$env:APPVEYOR_BUILD_VERSION -ne $NULL];
 
 Clean-Output
 Restore-Packages
