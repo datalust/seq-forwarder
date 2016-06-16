@@ -1,8 +1,38 @@
 # Seq Forwarder [![Build status](https://ci.appveyor.com/api/projects/status/qdvdn50xqwi43jkm/branch/master?svg=true)](https://ci.appveyor.com/project/seqlogs/seq-forwarder/branch/master) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq)
 
-[Seq Forwarder](http://blog.getseq.net/help-us-test-seq-forwarder/) was recently announced. **We're in the process 
-of moving its source code to this repository, which we expect to complete by the end of June 2016.** Until that
-work is complete, things may churn a bit here.
+[Seq Forwarder](http://blog.getseq.net/help-us-test-seq-forwarder/) is a client-side tool for sending log data to Seq.
+
+### HTTP forwarding
+
+Seq Forwarder can run as a Windows service on client machines. It receives events over a local HTTP
+API and persists these to its own internal storage until the remote Seq server can be reached.
+
+![Seq Forwarder](https://raw.githubusercontent.com/nblumhardt/images/master/seq-forwarder-schematic.png)
+
+Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
+the Seq one, so standard client libraries like _Serilog.Sinks.Seq_ can write to
+it directly.
+
+```csharp
+Log.Logger = new LoggerConfiguration()  
+    .WriteTo.Seq("http://localhost:15341")
+    .CreateLogger();
+
+Log.Information("Hello, Seq Forwarder!");  
+```
+
+### Importing JSON log files
+
+The `seq-forwarder import` command can be used to import JSON log files directly into Seq. The log file needs to 
+be in Serilog's native JSON format (e.g. produced by the [Seq sink](https://github.com/serilog/serilog-sinks-seq) or
+Serilog's `JsonFormatter`) with one JSON-encoded event per line.
+
+```
+seq-forwarder import -f myapp.json -u https://my-seq -p User=appuser1 -p Email=appuser@example.com
+```
+
+The command will print a GUID `ImportId` that will be attached to the imported events in Seq. Additional properties
+can be specified on the command-line, like `User=` and `Email=` above, to tag the events.
 
 ### Building
 
@@ -70,22 +100,3 @@ seq-forwarder config -k storage.bufferSizeBytes -v 1073741824
 seq-forwarder restart  
 ```
 
-**Directly import a JSON log file:**
-
-```
-seq-forwarder import -f myapp.json -u https://my-seq -p User=appuser1 -p Email=appuser@example.com
-```
-
-### Logging
-
-Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
-the Seq one, so standard client libraries like _Serilog.Sinks.Seq_ can write to
-it directly.
-
-```csharp
-Log.Logger = new LoggerConfiguration()  
-    .WriteTo.Seq("http://localhost:15341")
-    .CreateLogger();
-
-Log.Information("Hello, Seq Forwarder!");  
-```
