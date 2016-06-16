@@ -24,6 +24,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{AF47E806
 		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{CAE68175-E3AF-4120-BE76-C0EA9B024375}"
+	ProjectSection(SolutionItems) = preProject
+		data\test_42000_is_corrupt.json = data\test_42000_is_corrupt.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

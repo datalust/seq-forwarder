@@ -70,6 +70,12 @@ seq-forwarder config -k storage.bufferSizeBytes -v 1073741824
 seq-forwarder restart  
 ```
 
+**Directly import a JSON log file:**
+
+```
+seq-forwarder import -f myapp.json -u https://my-seq -p User=appuser1 -p Email=appuser@example.com
+```
+
 ### Logging
 
 Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
