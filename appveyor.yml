@@ -12,5 +12,6 @@ deploy:
     secure: Bo3ypKpKFxinjR9ShkNekNvkob2iklHJU+UlYyfHtcFFIAa58SV2TkEd0xWxz633
   artifact: /SeqForwarder-.*\.msi/
   prerelease: true
+  tag: v$(appveyor_build_version)
   on:
     branch: master
