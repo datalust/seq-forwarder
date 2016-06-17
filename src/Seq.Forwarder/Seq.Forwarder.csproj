@@ -131,8 +131,11 @@
     <Compile Include="Config\SeqForwarderDiagnosticConfig.cs" />
     <Compile Include="Config\SeqForwarderStorageConfig.cs" />
     <Compile Include="Diagnostics\InMemorySink.cs" />
+    <Compile Include="Importer\Filters.cs" />
     <Compile Include="Importer\HttpImporter.cs" />
-    <Compile Include="Importer\InMemoryLogBuffer.cs" />
+    <Compile Include="Importer\BufferedLogReader.cs" />
+    <Compile Include="Importer\JsonFileReader.cs" />
+    <Compile Include="Importer\Line.cs" />
     <Compile Include="Util\NonBindingSerializationBinder.cs" />
     <Compile Include="Cli\Commands\ImportCommand.cs" />
     <Compile Include="Importer\SeqImportConfig.cs" />

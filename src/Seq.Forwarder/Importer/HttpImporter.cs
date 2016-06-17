@@ -30,19 +30,19 @@ namespace Seq.Forwarder.Importer
         const string ApiKeyHeaderName = "X-Seq-ApiKey";
         const string BulkUploadResource = "api/events/raw";
 
-        readonly InMemoryLogBuffer _logBuffer;
+        readonly BufferedLogReader _logReader;
         readonly SeqImportConfig _importConfig;
         readonly HttpClient _httpClient;
 
-        public HttpImporter(InMemoryLogBuffer logBuffer, SeqImportConfig importConfig)
+        public HttpImporter(BufferedLogReader logReader, SeqImportConfig importConfig)
         {
-            if (logBuffer == null) throw new ArgumentNullException(nameof(logBuffer));
+            if (logReader == null) throw new ArgumentNullException(nameof(logReader));
             if (importConfig == null) throw new ArgumentNullException(nameof(importConfig));
 
             if (string.IsNullOrWhiteSpace(importConfig.ServerUrl))
                 throw new ArgumentException("The destination Seq server URL must be provided.");
 
-            _logBuffer = logBuffer;
+            _logReader = logReader;
             _importConfig = importConfig;
 
             var baseUri = importConfig.ServerUrl;
@@ -58,7 +58,7 @@ namespace Seq.Forwarder.Importer
             var sent = 0L;
             do
             {
-                var available = _logBuffer.Peek((int)_importConfig.RawPayloadLimitBytes);
+                var available = _logReader.Peek((int)_importConfig.RawPayloadLimitBytes);
                 if (available.Length == 0)
                 {
                     break;
@@ -84,7 +84,7 @@ namespace Seq.Forwarder.Importer
                     sent += len;
                     Log.Information("Sent {TotalBytes} total bytes uploaded", sent);
 
-                    _logBuffer.Dequeue(lastIncluded);
+                    _logReader.Dequeue(lastIncluded);
                     if (sendingSingles > 0)
                         sendingSingles--;
                 }
@@ -96,7 +96,7 @@ namespace Seq.Forwarder.Importer
                         payload.Position = 0;
                         var payloadText = new StreamReader(payload, Encoding.UTF8).ReadToEnd();
                         Log.Error("HTTP shipping failed with {StatusCode}: {Result}; payload was {InvalidPayload}", result.StatusCode, await result.Content.ReadAsStringAsync(), payloadText);
-                        _logBuffer.Dequeue(lastIncluded);
+                        _logReader.Dequeue(lastIncluded);
                         sendingSingles = 0;
                     }
                     else

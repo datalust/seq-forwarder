@@ -76,7 +76,7 @@ namespace seq_import
                 else if (File.Exists(_storagePath.ConfigFilePath))
                 {
                     var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                    if (string.IsNullOrEmpty(config.Output.ServerUrl))
+                    if (!string.IsNullOrEmpty(config.Output.ServerUrl))
                     {
                         serverUrl = config.Output.ServerUrl;
                         apiKey = _serverInformation.IsApiKeySpecified ? _serverInformation.ApiKey : config.Output.ApiKey;
@@ -122,7 +122,8 @@ namespace seq_import
                     tags.Add(p.Key, p.Value);
             }
 
-            var logBuffer = new InMemoryLogBuffer(file, tags);
+            var lazyReader = JsonFileReader.LazyRead(file, tags);
+            var logBuffer = new BufferedLogReader(lazyReader);
 
             var shipper = new HttpImporter(logBuffer, new SeqImportConfig
             {
@@ -136,7 +137,7 @@ namespace seq_import
             Log.Information("Starting import {ImportId}", importId);
             await shipper.Import();
             sw.Stop();
-            Log.Information("Import {ImportId} completes in {Elapsed:0.0} ms", importId, sw.Elapsed.TotalMilliseconds);
+            Log.Information("Import {ImportId} completed in {Elapsed:0.0} ms", importId, sw.Elapsed.TotalMilliseconds);
         }
     }
 }
