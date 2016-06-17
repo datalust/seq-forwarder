@@ -36,6 +36,11 @@ function Execute-MSBuild
 	& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x86
 }
 
+function Execute-Tests
+{
+	& ./packages/xunit.runner.console.2.1.0/tools/xunit.console.x86.exe ./test/Seq.Forwarder.Tests/bin/Release/Seq.Forwarder.Tests.dll
+}
+
 function Publish-Artifacts($version)
 {
 	mkdir ./artifacts
@@ -51,6 +56,7 @@ Restore-Packages
 Update-AssemblyInfo($version)
 Update-WixVersion($version)
 Execute-MSBuild
+Execute-Tests
 Publish-Artifacts($version)
 
 Pop-Location
