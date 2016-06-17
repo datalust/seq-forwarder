@@ -76,6 +76,8 @@ namespace Seq.Forwarder.Storage
 
         public void Enqueue(byte[][] values)
         {
+            if (values == null) throw new ArgumentNullException(nameof(values));
+
             lock (_sync)
             {
                 RequireNotDisposed();
@@ -87,6 +89,8 @@ namespace Seq.Forwarder.Storage
                 {
                     foreach (var v in values)
                     {
+                        if (v == null) throw new ArgumentException("Value array may not contain null.");
+
                         tx.Put(db, ULongKeyToByteKey(_nextId++), v);
                         totalPayloadWritten += (ulong) v.Length;
                     }
