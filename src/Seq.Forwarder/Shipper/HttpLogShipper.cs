@@ -162,7 +162,7 @@ namespace Seq.Forwarder.Shipper
                         }
                         else
                         {
-                            // Unscientific (shoudl "binary search" in batches) but sending the next
+                            // Unscientific (should "binary search" in batches) but sending the next
                             // hundred events singly should flush out the problematic one.
                             sendingSingles = 100;
                         }
