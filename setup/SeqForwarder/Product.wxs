@@ -8,6 +8,7 @@
            Manufacturer="Datalust Pty Ltd" UpgradeCode="EABD21DF-7646-4684-ACD3-FEC86B738CD1">
 
     <Package InstallerVersion="200"
+         Platform="x64"
          Compressed="yes"
          InstallScope="perMachine"
          InstallPrivileges="elevated" />
@@ -52,7 +53,7 @@
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFilesFolder">
+			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="INSTALLFOLDER" Name="Seq Forwarder" />
 			</Directory>
       <Directory Id="ProgramMenuFolder">
