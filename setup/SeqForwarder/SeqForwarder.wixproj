@@ -13,20 +13,20 @@
     <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <DefineConstants>Version=$(Version)</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;Version=$(Version)</DefineConstants>
-    <CompilerAdditionalOptions>-arch x86</CompilerAdditionalOptions>
+    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <SuppressIces>
     </SuppressIces>
     <LinkerAdditionalOptions>
     </LinkerAdditionalOptions>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <CompilerAdditionalOptions>-arch x86</CompilerAdditionalOptions>
+    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <DefineConstants>Version=$(Version)</DefineConstants>
     <LinkerAdditionalOptions>
     </LinkerAdditionalOptions>
