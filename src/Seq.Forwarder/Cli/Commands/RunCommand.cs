@@ -89,7 +89,7 @@ namespace Seq.Forwarder.Cli.Commands
                 .Enrich.FromLogContext()
                 .MinimumLevel.Is(internalLoggingLevel)
                 .WriteTo.RollingFile(
-                    new CompactJsonFormatter(),
+                    new RenderedCompactJsonFormatter(),
                     GetRollingLogFilePathFormat(internalLogPath),
                     fileSizeLimitBytes: 1024*1024);
             
