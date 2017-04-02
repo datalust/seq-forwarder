@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,14 +46,12 @@ namespace Seq.Forwarder.Shipper
 
         public HttpLogShipper(LogBuffer logBuffer, SeqForwarderOutputConfig outputConfig)
         {
-            if (logBuffer == null) throw new ArgumentNullException(nameof(logBuffer));
-            if (outputConfig == null) throw new ArgumentNullException(nameof(outputConfig));
+            _logBuffer = logBuffer ?? throw new ArgumentNullException(nameof(logBuffer));
+            _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
 
             if (string.IsNullOrWhiteSpace(outputConfig.ServerUrl))
                 throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
 
-            _logBuffer = logBuffer;
-            _outputConfig = outputConfig;
             _connectionSchedule = new ExponentialBackoffConnectionSchedule(QuietWaitPeriod);
 
             var baseUri = outputConfig.ServerUrl;
@@ -125,9 +123,7 @@ namespace Seq.Forwarder.Shipper
                         break;
                     }
 
-                    Stream payload;
-                    ulong lastIncluded;
-                    MakePayload(available, sendingSingles > 0, out payload, out lastIncluded);
+                    MakePayload(available, sendingSingles > 0, out Stream payload, out ulong lastIncluded);
 
                     var content = new StreamContent(new UnclosableStreamWrapper(payload));
                     content.Headers.ContentType = new MediaTypeHeaderValue("application/json")
