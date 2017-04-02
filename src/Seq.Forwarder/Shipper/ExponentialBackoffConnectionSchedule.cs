@@ -42,6 +42,8 @@ namespace Seq.Forwarder.Shipper
             ++_failuresSinceSuccessfulConnection;
         }
 
+        public bool LastConnectionFailed => _failuresSinceSuccessfulConnection != 0;
+
         public TimeSpan NextInterval
         {
             get

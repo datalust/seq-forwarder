@@ -21,6 +21,7 @@ using Newtonsoft.Json.Linq;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
+using Seq.Forwarder.Shipper;
 
 namespace Seq.Forwarder.Web.Api
 {
@@ -30,14 +31,16 @@ namespace Seq.Forwarder.Web.Api
 
         readonly Lazy<LogBuffer> _logBuffer;
         readonly Lazy<SeqForwarderOutputConfig> _outputConfig;
+        readonly Lazy<ServerResponseProxy> _serverResponseProxy;
 
         readonly JsonSerializer _rawSerializer = JsonSerializer.Create(
             new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
 
-        public RawEventsModule(Lazy<LogBuffer> logBuffer, Lazy<SeqForwarderOutputConfig> outputConfig)
+        public RawEventsModule(Lazy<LogBuffer> logBuffer, Lazy<SeqForwarderOutputConfig> outputConfig, Lazy<ServerResponseProxy> serverResponseProxy)
         {
             _logBuffer = logBuffer;
             _outputConfig = outputConfig;
+            _serverResponseProxy = serverResponseProxy;
 
             Get["/api/events/describe"] = _ => Response.AsText("{\"Links\":{\"Raw\":\"/api/events/raw\"}}", "application/json");
             Post["/api/events/raw"] = _ => Ingest();
@@ -124,7 +127,7 @@ namespace Seq.Forwarder.Web.Api
 
             _logBuffer.Value.Enqueue(encoded);
             
-            var response = Response.AsText("{}", "application/json");
+            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(_outputConfig.Value.ApiKey), "application/json");
             response.StatusCode = HttpStatusCode.Created;
             return response;
         }

@@ -52,6 +52,7 @@ namespace Seq.Forwarder
             builder.Register(c => new LogBuffer(_bufferPath, _config.Storage.BufferSizeBytes)).SingleInstance();
             builder.RegisterType<HttpLogShipper>().SingleInstance();
             builder.RegisterInstance(_config.Output);
+            builder.RegisterType<ServerResponseProxy>().SingleInstance();
         }
     }
 }
