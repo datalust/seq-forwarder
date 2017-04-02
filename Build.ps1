@@ -38,7 +38,7 @@ function Execute-MSBuild
 
 function Execute-Tests
 {
-    pushd ./Seq.Forwarder.Tests
+    pushd ./test/Seq.Forwarder.Tests
 
     & dotnet test -c Release
     if($LASTEXITCODE -ne 0) { exit 3 }
