@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ namespace Seq.Forwarder.Shipper
         {
             ++_failuresSinceSuccessfulConnection;
         }
+
+        public bool LastConnectionFailed => _failuresSinceSuccessfulConnection != 0;
 
         public TimeSpan NextInterval
         {
