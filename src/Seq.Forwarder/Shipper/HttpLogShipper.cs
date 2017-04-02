@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using Nancy.IO;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
+using System.Threading.Tasks;
 
 namespace Seq.Forwarder.Shipper
 {
@@ -35,6 +36,8 @@ namespace Seq.Forwarder.Shipper
         readonly SeqForwarderOutputConfig _outputConfig;
         readonly HttpClient _httpClient;
         readonly ExponentialBackoffConnectionSchedule _connectionSchedule;
+        readonly ServerResponseProxy _serverResponseProxy;
+        DateTime _nextRequiredLevelCheck;
 
         readonly object _stateLock = new object();
         readonly Timer _timer;
@@ -42,18 +45,17 @@ namespace Seq.Forwarder.Shipper
 
         volatile bool _unloading;
 
-        static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2);
+        static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2), MaximumConnectionInterval = TimeSpan.FromMinutes(2);
 
-        public HttpLogShipper(LogBuffer logBuffer, SeqForwarderOutputConfig outputConfig)
+        public HttpLogShipper(LogBuffer logBuffer, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy)
         {
-            if (logBuffer == null) throw new ArgumentNullException(nameof(logBuffer));
-            if (outputConfig == null) throw new ArgumentNullException(nameof(outputConfig));
+            _logBuffer = logBuffer ?? throw new ArgumentNullException(nameof(logBuffer));
+            _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
+            _serverResponseProxy = serverResponseProxy ?? throw new ArgumentNullException(nameof(serverResponseProxy));
 
             if (string.IsNullOrWhiteSpace(outputConfig.ServerUrl))
                 throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
 
-            _logBuffer = logBuffer;
-            _outputConfig = outputConfig;
             _connectionSchedule = new ExponentialBackoffConnectionSchedule(QuietWaitPeriod);
 
             var baseUri = outputConfig.ServerUrl;
@@ -76,6 +78,7 @@ namespace Seq.Forwarder.Shipper
 
                 Log.Information("Log shipper started, events will be dispatched to {ServerUrl}", _outputConfig.ServerUrl);
 
+                _nextRequiredLevelCheck = DateTime.UtcNow.Add(MaximumConnectionInterval);
                 _started = true;
                 SetTimer();
             }
@@ -111,6 +114,11 @@ namespace Seq.Forwarder.Shipper
 
         void OnTick()
         {
+            OnTickAsync().Wait();
+        }
+
+        async Task OnTickAsync()
+        {
             try
             {
                 var sendingSingles = 0;
@@ -119,15 +127,16 @@ namespace Seq.Forwarder.Shipper
                     var available = _logBuffer.Peek((int)_outputConfig.RawPayloadLimitBytes);
                     if (available.Length == 0)
                     {
-                        // For whatever reason, there's nothing waiting to send. This means we should try connecting again at the
-                        // regular interval, so mark the attempt as successful.
-                        _connectionSchedule.MarkSuccess();
-                        break;
+                        if (DateTime.UtcNow < _nextRequiredLevelCheck || _connectionSchedule.LastConnectionFailed)
+                        {
+                            // For whatever reason, there's nothing waiting to send. This means we should try connecting again at the
+                            // regular interval, so mark the attempt as successful.
+                            _connectionSchedule.MarkSuccess();
+                            break;
+                        }
                     }
 
-                    Stream payload;
-                    ulong lastIncluded;
-                    MakePayload(available, sendingSingles > 0, out payload, out lastIncluded);
+                    MakePayload(available, sendingSingles > 0, out Stream payload, out ulong lastIncluded);
 
                     var content = new StreamContent(new UnclosableStreamWrapper(payload));
                     content.Headers.ContentType = new MediaTypeHeaderValue("application/json")
@@ -135,16 +144,21 @@ namespace Seq.Forwarder.Shipper
                         CharSet = Encoding.UTF8.WebName
                     };
 
-                    if (!string.IsNullOrWhiteSpace(_outputConfig.ApiKey))
+                    if (_outputConfig.ApiKey != null)
+                    {
                         content.Headers.Add(ApiKeyHeaderName, _outputConfig.ApiKey);
+                    }
 
-                    var result = _httpClient.PostAsync(BulkUploadResource, content).Result;
+                    var result = await _httpClient.PostAsync(BulkUploadResource, content);
                     if (result.IsSuccessStatusCode)
                     {
                         _connectionSchedule.MarkSuccess();
                         _logBuffer.Dequeue(lastIncluded);
                         if (sendingSingles > 0)
                             sendingSingles--;
+
+                        _serverResponseProxy.ResponseReturned(_outputConfig.ApiKey, await result.Content.ReadAsStringAsync());
+                        _nextRequiredLevelCheck = DateTime.UtcNow.Add(MaximumConnectionInterval);
                     }
                     else if (result.StatusCode == HttpStatusCode.BadRequest ||
                                 result.StatusCode == HttpStatusCode.RequestEntityTooLarge)
@@ -156,7 +170,7 @@ namespace Seq.Forwarder.Shipper
                         {
                             payload.Position = 0;
                             var payloadText = new StreamReader(payload, Encoding.UTF8).ReadToEnd();
-                            Log.Error("HTTP shipping failed with {StatusCode}: {Result}; payload was {InvalidPayload}", result.StatusCode, result.Content.ReadAsStringAsync().Result, payloadText);
+                            Log.Error("HTTP shipping failed with {StatusCode}: {Result}; payload was {InvalidPayload}", result.StatusCode, await result.Content.ReadAsStringAsync(), payloadText);
                             _logBuffer.Dequeue(lastIncluded);
                             sendingSingles = 0;
                         }
@@ -170,7 +184,7 @@ namespace Seq.Forwarder.Shipper
                     else
                     {
                         _connectionSchedule.MarkFailure();
-                        Log.Error("Received failed HTTP shipping result {StatusCode}: {Result}", result.StatusCode, result.Content.ReadAsStringAsync().Result);
+                        Log.Error("Received failed HTTP shipping result {StatusCode}: {Result}", result.StatusCode, await result.Content.ReadAsStringAsync());
                         break;
                     }
                 }
@@ -194,7 +208,6 @@ namespace Seq.Forwarder.Shipper
         void MakePayload(LogBufferEntry[] entries, bool oneOnly, out Stream utf8Payload, out ulong lastIncluded)
         {
             if (entries == null) throw new ArgumentNullException(nameof(entries));
-            if (entries.Length == 0) throw new ArgumentException("Must contain entries");
             lastIncluded = 0;
 
             var raw = new MemoryStream();

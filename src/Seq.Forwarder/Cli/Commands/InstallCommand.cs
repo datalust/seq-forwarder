@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -110,8 +110,7 @@ namespace Seq.Forwarder.Cli.Commands
 
         static void Reconfigure(ServiceController controller, TextWriter cout)
         {
-            string path;
-            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out path))
+            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out string path))
                 return;
 
             var current = "\"" + typeof(Program).Assembly.Location + "\"";

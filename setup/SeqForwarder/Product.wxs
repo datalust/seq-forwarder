@@ -66,7 +66,7 @@
         <Shortcut Id="SeqForwarderAdministrationStartMenuShortcut"
                   Name="Seq Forwarder Administration"
                   Description="Configure the Seq Forwarder Windows Service"
-                  Target="[INSTALLFOLDER]seq.administration.exe"
+                  Target="[INSTALLFOLDER]seq.forwarder.administration.exe"
                   WorkingDirectory="INSTALLFOLDER"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
         <RegistryValue Root="HKCU" Key="Software\Datalust\Seq Forwarder" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
@@ -79,7 +79,7 @@
       <Component Id="SeqServiceControl" Directory="INSTALLFOLDER" Guid="ECED6E49-3809-4DA5-ABD0-4A3413D75012">
         <CreateFolder/>
         <ServiceControl Id="StartService" Stop="both" Name="Seq Forwarder" Wait="yes" />
-        <RemoveFile Id="InstallState" On="uninstall" Name="seq.InstallState" />
+        <RemoveFile Id="InstallState" On="uninstall" Name="seq-forwarder.InstallState" />
         <Environment
           Id="PATH"
           Name="PATH"
