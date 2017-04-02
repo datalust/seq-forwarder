@@ -208,7 +208,6 @@ namespace Seq.Forwarder.Shipper
         void MakePayload(LogBufferEntry[] entries, bool oneOnly, out Stream utf8Payload, out ulong lastIncluded)
         {
             if (entries == null) throw new ArgumentNullException(nameof(entries));
-            if (entries.Length == 0) throw new ArgumentException("Must contain entries");
             lastIncluded = 0;
 
             var raw = new MemoryStream();
