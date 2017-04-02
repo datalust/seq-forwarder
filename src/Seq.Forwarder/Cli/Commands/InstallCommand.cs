@@ -110,8 +110,7 @@ namespace Seq.Forwarder.Cli.Commands
 
         static void Reconfigure(ServiceController controller, TextWriter cout)
         {
-            string path;
-            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out path))
+            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out string path))
                 return;
 
             var current = "\"" + typeof(Program).Assembly.Location + "\"";

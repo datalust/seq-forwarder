@@ -58,9 +58,8 @@ namespace Seq.Forwarder.Web.Api
                     .WithStatusCode(HttpStatusCode.BadRequest);
             }
 
-            JToken eventsToken;
             if (posted == null ||
-                !(posted.TryGetValue("events", StringComparison.Ordinal, out eventsToken) ||
+                !(posted.TryGetValue("events", StringComparison.Ordinal, out JToken eventsToken) ||
                   posted.TryGetValue("Events", StringComparison.Ordinal, out eventsToken)))
             {
                 IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid JSON structure", Request.UserHostAddress);
