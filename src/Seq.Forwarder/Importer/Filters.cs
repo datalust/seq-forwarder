@@ -27,7 +27,7 @@ namespace Seq.Forwarder.Importer
         static readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             DateParseHandling = DateParseHandling.None,
-            Binder = new NonBindingSerializationBinder(),
+            SerializationBinder = new NonBindingSerializationBinder(),
             TypeNameHandling = TypeNameHandling.None
         });
 

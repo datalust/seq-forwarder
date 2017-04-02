@@ -2,10 +2,10 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
         <DirectoryRef Id="INSTALLFOLDER">
-            <Component Id="cmpA649DFAC5833A09BC5492E5C226C50BD" Guid="{A8DB8F06-50FF-4D0C-A0D5-20056BA3492B}">
+            <Component Id="cmpA649DFAC5833A09BC5492E5C226C50BD" Guid="{FE1C0837-45D6-4B9D-BE50-8FB2A21888F0}">
                 <File Id="fil630EA70A5DD949EB3016A19DB62D7BCB" KeyPath="yes" Source="$(var.AdminBasePath)\Seq.Forwarder.Administration.exe" />
             </Component>
-            <Component Id="cmp22ACF32714AEFA537B3DC30C167F0AE2" Guid="{69CEA154-6C7F-431F-88DD-D401AD6F2872}">
+            <Component Id="cmp22ACF32714AEFA537B3DC30C167F0AE2" Guid="{12D740EF-E3C1-42B7-B190-38F3E33BBC4B}">
                 <File Id="fil14A4AC386DABFD6900783A399A6F7FA2" KeyPath="yes" Source="$(var.AdminBasePath)\Seq.Forwarder.Administration.exe.config" />
             </Component>
             

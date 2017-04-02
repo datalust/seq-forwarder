@@ -27,7 +27,7 @@ namespace Seq.Forwarder.Administration
 
             var seqExe = Path.Combine(thisDir, "seq-forwarder.exe");
             if (!File.Exists(seqExe))
-                seqExe = Path.Combine(thisDir, @"..\..\..\Seq.Forwarder\bin\Debug\seq-forwarder.exe");
+                seqExe = Path.Combine(thisDir, @"..\..\..\..\Seq.Forwarder\bin\x64\Debug\net4.5.2\seq-forwarder.exe");
 
             return CaptiveProcess.Run(seqExe, args, writeOutput, writeError);
         }

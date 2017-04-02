@@ -38,7 +38,12 @@ function Execute-MSBuild
 
 function Execute-Tests
 {
-	& ./packages/xunit.runner.console.2.1.0/tools/xunit.console.x86.exe ./test/Seq.Forwarder.Tests/bin/Release/Seq.Forwarder.Tests.dll
+    pushd ./test/Seq.Forwarder.Tests
+
+    & dotnet test -c Release
+    if($LASTEXITCODE -ne 0) { exit 3 }
+
+    popd
 }
 
 function Publish-Artifacts($version)

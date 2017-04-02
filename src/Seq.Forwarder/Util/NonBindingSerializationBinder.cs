@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Runtime.Serialization;
 
 namespace Seq.Forwarder.Util
 {
-    class NonBindingSerializationBinder: SerializationBinder
+    class NonBindingSerializationBinder: ISerializationBinder
     {
-        public override Type BindToType(string assemblyName, string typeName)
+        public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+        {
+            assemblyName = typeName = null;
+        }
+
+        public Type BindToType(string assemblyName, string typeName)
         {
             return null;
         }
