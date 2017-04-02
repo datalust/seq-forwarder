@@ -21,6 +21,7 @@ using Seq.Forwarder.Config;
 using Seq.Forwarder.ServiceProcess;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -88,6 +89,7 @@ namespace Seq.Forwarder.Cli.Commands
                 .Enrich.FromLogContext()
                 .MinimumLevel.Is(internalLoggingLevel)
                 .WriteTo.RollingFile(
+                    new CompactJsonFormatter(),
                     GetRollingLogFilePathFormat(internalLogPath),
                     fileSizeLimitBytes: 1024*1024);
             

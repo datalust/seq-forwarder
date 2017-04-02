@@ -12,24 +12,17 @@
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <DefineConstants>Version=$(Version)</DefineConstants>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
+    <LinkerAdditionalOptions></LinkerAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;Version=$(Version)</DefineConstants>
-    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
-    <SuppressIces>
-    </SuppressIces>
-    <LinkerAdditionalOptions>
-    </LinkerAdditionalOptions>
+    <SuppressIces></SuppressIces>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <DefineConstants>Version=$(Version)</DefineConstants>
-    <LinkerAdditionalOptions>
-    </LinkerAdditionalOptions>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />
@@ -58,11 +51,11 @@
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">
     <PropertyGroup>
-      <LinkerBaseInputPaths>..\..\src\Seq.Forwarder\bin\$(Configuration);..\..\src\Seq.Forwarder.Administration\bin\$(Configuration)</LinkerBaseInputPaths>
-      <DefineConstants>BasePath=..\..\src\Seq.Forwarder\bin\$(Configuration);AdminBasePath=..\..\src\Seq.Forwarder.Administration\bin\$(Configuration);</DefineConstants>
+      <LinkerBaseInputPaths>..\..\src\Seq.Forwarder\bin\x64\$(Configuration)\net4.5.2;..\..\src\Seq.Forwarder.Administration\bin\x64\$(Configuration)</LinkerBaseInputPaths>
+      <DefineConstants>BasePath=..\..\src\Seq.Forwarder\bin\x64\$(Configuration)\net4.5.2;AdminBasePath=..\..\src\Seq.Forwarder.Administration\bin\x64\$(Configuration);</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="SeqForwarder.wxs" Directory="..\..\src\Seq.Forwarder\bin\$(Configuration)" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="SeqForwarder_Project" SuppressCom="true" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="RemovePdbs.xslt" />
-    <HeatDirectory OutputFile="SeqForwarderAdministration.wxs" Directory="..\..\src\Seq.Forwarder.Administration\bin\$(Configuration)" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="SeqForwarderAdministration_Project" SuppressCom="true" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.AdminBasePath" Transforms="RemovePdbs.xslt" />
+    <HeatDirectory OutputFile="SeqForwarder.wxs" Directory="..\..\src\Seq.Forwarder\bin\x64\$(Configuration)\net4.5.2" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="SeqForwarder_Project" SuppressCom="true" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" Transforms="RemovePdbs.xslt" />
+    <HeatDirectory OutputFile="SeqForwarderAdministration.wxs" Directory="..\..\src\Seq.Forwarder.Administration\bin\x64\$(Configuration)" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="SeqForwarderAdministration_Project" SuppressCom="true" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.AdminBasePath" Transforms="RemovePdbs.xslt" />
   </Target>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

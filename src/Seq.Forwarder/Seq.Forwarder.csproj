@@ -14,9 +14,10 @@
     <Authors>Datalust Pty Ltd, Contributors</Authors>
     <Company>Datalust Pty Ltd</Company>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyTitle>Seq Forwarder</AssemblyTitle>
+    <AssemblyTitle>Seq.Forwarder</AssemblyTitle>
     <Description>Seq HTTP Log Forwarder</Description>
     <Copyright>Copyright © Datalust Pty Ltd and contributors 2017</Copyright>
+    <AssemblyName>seq-forwarder</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +49,7 @@
     <PackageReference Include="nancy.hosting.self" Version="1.4.1" />
     <PackageReference Include="newtonsoft.json" Version="10.0.1" />
     <PackageReference Include="serilog" Version="2.4.0" />
+    <PackageReference Include="serilog.formatting.compact" Version="1.0.0" />
     <PackageReference Include="serilog.sinks.literate" Version="2.1.0" />
     <PackageReference Include="serilog.sinks.rollingfile" Version="3.3.0" />
   </ItemGroup>
