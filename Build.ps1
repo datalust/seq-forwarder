@@ -38,12 +38,12 @@ function Execute-MSBuild
 
 function Execute-Tests
 {
-	pushd ./Seq.Forwarder.Tests
+    pushd ./Seq.Forwarder.Tests
 
-	& dotnet test -c Release
+    & dotnet test -c Release
     if($LASTEXITCODE -ne 0) { exit 3 }
 
-	popd
+    popd
 }
 
 function Publish-Artifacts($version)
