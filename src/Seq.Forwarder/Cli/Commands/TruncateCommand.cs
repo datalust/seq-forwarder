@@ -36,8 +36,10 @@ namespace Seq.Forwarder.Cli.Commands
             try
             {
                 var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes);
-                buffer.Truncate();
+                using (var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes))
+                {
+                    buffer.Truncate();
+                }
                 return 0;
             }
             catch (Exception ex)
