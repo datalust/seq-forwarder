@@ -37,12 +37,14 @@ namespace Seq.Forwarder.Cli.Commands
             try
             {
                 var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes);
-                buffer.Enumerate((k, v) =>
+                using (var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes))
                 {
-                    var s = Encoding.UTF8.GetString(v);
-                    Console.WriteLine(s);
-                });
+                    buffer.Enumerate((k, v) =>
+                    {
+                        var s = Encoding.UTF8.GetString(v);
+                        Console.WriteLine(s);
+                    });
+                }
                 return 0;
             }
             catch (Exception ex)
