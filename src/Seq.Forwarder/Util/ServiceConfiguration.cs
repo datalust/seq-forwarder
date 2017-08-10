@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using Serilog;
 
 namespace Seq.Forwarder.Util
 {
@@ -50,6 +51,58 @@ namespace Seq.Forwarder.Util
 
             path = line.Replace("BINARY_PATH_NAME   : ", "");
             return true;
+        }
+
+        static bool GetServiceCommandLine(string serviceName, TextWriter cout, out string path)
+        {
+            if (serviceName == null) throw new ArgumentNullException(nameof(serviceName));
+            if (cout == null) throw new ArgumentNullException(nameof(cout));
+
+            var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
+
+            var config = new StringBuilder();
+            if (0 != CaptiveProcess.Run(sc, "qc \"" + serviceName + "\"", l => config.AppendLine(l), cout.WriteLine))
+            {
+                cout.WriteLine("Could not query service path; ignoring.");
+                path = null;
+                return false;
+            }
+
+            var lines = config.ToString()
+                .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim());
+
+            var line = lines
+                .SingleOrDefault(l => l.StartsWith("BINARY_PATH_NAME   : "));
+
+            if (line == null)
+            {
+                cout.WriteLine("No existing binary path could be determined.");
+                path = null;
+                return false;
+            }
+
+            path = line.Replace("BINARY_PATH_NAME   : ", "");
+            return true;
+        }
+
+        public static bool GetServiceStoragePath(string serviceName, StringWriter cout, out string storage)
+        {
+            if (serviceName == null) throw new ArgumentNullException(nameof(serviceName));
+            if (cout == null) throw new ArgumentNullException(nameof(cout));
+
+            string binpath;
+            if (GetServiceCommandLine(serviceName, new StringWriter(), out binpath) &&
+                binpath.Contains("--storage=\""))
+            {
+                var start = binpath.IndexOf("--storage=\"", StringComparison.Ordinal) + 11;
+                var chop = binpath.Substring(start);
+                storage = chop.Substring(0, chop.IndexOf('"'));
+                return true;
+            }
+
+            storage = null;
+            return false;
         }
     }
 }
