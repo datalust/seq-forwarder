@@ -31,7 +31,7 @@ namespace Seq.Forwarder.Cli.Installers
         {
             _serviceProcessInstaller = new ServiceProcessInstaller
             {
-                Account = ServiceAccount.LocalService               
+                Account = ServiceAccount.LocalService
             };
 
             Installers.Add(_serviceProcessInstaller);
@@ -56,8 +56,8 @@ namespace Seq.Forwarder.Cli.Installers
                 path.Append('"');
             }
 
-            path.AppendFormat(" run --storage={0}", Context.Parameters["storage"]);
-            
+            path.AppendFormat(" run --storage={0} --listen={1}", Context.Parameters["storage"], Context.Parameters["listen"]);
+
             Context.Parameters["assemblypath"] = path.ToString();
 
             var username = Context.Parameters["username"];

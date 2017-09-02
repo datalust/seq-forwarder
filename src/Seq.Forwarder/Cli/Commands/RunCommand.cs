@@ -29,6 +29,7 @@ namespace Seq.Forwarder.Cli.Commands
     class RunCommand : Command
     {
         readonly StoragePathFeature _storagePath;
+        readonly ListenUriFeature _listenUri;
 
         bool _nologo;
 
@@ -36,6 +37,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             Options.Add("nologo", v => _nologo = true);
             _storagePath = Enable<StoragePathFeature>();
+            _listenUri = Enable<ListenUriFeature>();
         }
 
         protected override int Run(TextWriter cout)
@@ -47,7 +49,7 @@ namespace Seq.Forwarder.Cli.Commands
                     WriteBanner();
                     cout.WriteLine();
                 }
-                
+
                 cout.WriteLine("Running as server; press Ctrl+C to exit.");
                 cout.WriteLine();
             }
@@ -72,11 +74,11 @@ namespace Seq.Forwarder.Cli.Commands
             Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
 
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, config));
+            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri, config));
 
             var container = builder.Build();
-            var exit = Environment.UserInteractive 
-                ? RunInteractive(container, cout) 
+            var exit = Environment.UserInteractive
+                ? RunInteractive(container, cout)
                 : RunService(container);
 
             Log.CloseAndFlush();
@@ -91,8 +93,8 @@ namespace Seq.Forwarder.Cli.Commands
                 .WriteTo.RollingFile(
                     new RenderedCompactJsonFormatter(),
                     GetRollingLogFilePathFormat(internalLogPath),
-                    fileSizeLimitBytes: 1024*1024);
-            
+                    fileSizeLimitBytes: 1024 * 1024);
+
             if (Environment.UserInteractive)
                 loggerConfiguration.WriteTo.LiterateConsole(restrictedToMinimumLevel: LogEventLevel.Information);
 
@@ -113,7 +115,7 @@ namespace Seq.Forwarder.Cli.Commands
         string GetRollingLogFilePathFormat(string internalLogPath)
         {
             if (internalLogPath == null) throw new ArgumentNullException(nameof(internalLogPath));
-            
+
             return Path.Combine(internalLogPath, "seq-forwarder-{Date}.log");
         }
 
@@ -121,8 +123,8 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                ServiceBase.Run(new ServiceBase[] { 
-                    new SeqForwarderWindowsService(container.Resolve<ServerService>(), 
+                ServiceBase.Run(new ServiceBase[] {
+                    new SeqForwarderWindowsService(container.Resolve<ServerService>(),
                         container)
                 });
                 return 0;
@@ -158,7 +160,7 @@ namespace Seq.Forwarder.Cli.Commands
             {
                 return -1;
             }
-            finally 
+            finally
             {
                 container.Dispose();
             }

@@ -27,13 +27,16 @@ namespace Seq.Forwarder
     class SeqForwarderModule : Module
     {
         readonly string _bufferPath;
+        readonly string _listenUri;
         readonly SeqForwarderConfig _config;
 
-        public SeqForwarderModule(string bufferPath, SeqForwarderConfig config)
+        public SeqForwarderModule(string bufferPath, string listenUri, SeqForwarderConfig config)
         {
             if (bufferPath == null) throw new ArgumentNullException(nameof(bufferPath));
+            if (listenUri == null) throw new ArgumentNullException(nameof(listenUri));
             if (config == null) throw new ArgumentNullException(nameof(config));
             _bufferPath = bufferPath;
+            _listenUri = listenUri;
             _config = config;
         }
 
@@ -47,7 +50,7 @@ namespace Seq.Forwarder
                 .AsSelf()
                 .PropertiesAutowired();
 
-            builder.RegisterType<ServerService>().SingleInstance();
+            builder.Register(c => new ServerService(c.Resolve<NancyBootstrapper>(), c.Resolve<Lazy<HttpLogShipper>>(), _listenUri)).SingleInstance();
             builder.RegisterType<NancyBootstrapper>();
             builder.Register(c => new LogBuffer(_bufferPath, _config.Storage.BufferSizeBytes)).SingleInstance();
             builder.RegisterType<HttpLogShipper>().SingleInstance();
