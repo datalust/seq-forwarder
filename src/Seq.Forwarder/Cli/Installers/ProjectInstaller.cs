@@ -56,7 +56,7 @@ namespace Seq.Forwarder.Cli.Installers
                 path.Append('"');
             }
 
-            path.AppendFormat(" run --storage={0} --listen={1}", Context.Parameters["storage"], Context.Parameters["listen"]);
+            path.AppendFormat(" run --storage={0}", Context.Parameters["storage"]);
 
             Context.Parameters["assemblypath"] = path.ToString();
 

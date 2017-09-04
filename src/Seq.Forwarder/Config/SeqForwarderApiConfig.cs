@@ -14,22 +14,10 @@
 
 using System;
 
-namespace Seq.Forwarder.Cli.Features
+namespace Seq.Forwarder.Config
 {
-    class ListenUriFeature : CommandFeature
+    class SeqForwarderApiConfig
     {
-        string _listenUri;
-
-        public string ListenUri
-        {
-            get { return _listenUri; }
-        }
-
-        public override void Enable(OptionSet options)
-        {
-            options.Add("l=|listen=",
-                "Set the listen Uri; http://localhost:15341/ is used by default.",
-                v => _listenUri = v);
-        }
+        public string ListenUri { get; set; }
     }
 }

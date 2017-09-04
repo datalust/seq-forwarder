@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.ServiceProcess;
-// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +19,9 @@ using Seq.Forwarder.ServiceProcess;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using System;
+using System.IO;
+using System.ServiceProcess;
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -74,7 +74,7 @@ namespace Seq.Forwarder.Cli.Commands
             Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
 
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri, config));
+            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri ?? config.Api.ListenUri, config));
 
             var container = builder.Build();
             var exit = Environment.UserInteractive

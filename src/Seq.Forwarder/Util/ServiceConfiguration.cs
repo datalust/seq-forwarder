@@ -104,24 +104,5 @@ namespace Seq.Forwarder.Util
             storage = null;
             return false;
         }
-
-        public static bool GetServiceListenUri(string serviceName, StringWriter cout, out string listenUri)
-        {
-            if (serviceName == null) throw new ArgumentNullException(nameof(serviceName));
-            if (cout == null) throw new ArgumentNullException(nameof(cout));
-
-            string binpath;
-            if (GetServiceCommandLine(serviceName, new StringWriter(), out binpath) &&
-                binpath.Contains("--listen=\""))
-            {
-                var start = binpath.IndexOf("--listen=\"", StringComparison.Ordinal) + 11;
-                var chop = binpath.Substring(start);
-                listenUri = chop.Substring(0, chop.IndexOf('"'));
-                return true;
-            }
-
-            listenUri = null;
-            return false;
-        }
     }
 }

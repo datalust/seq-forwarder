@@ -185,12 +185,17 @@ namespace Seq.Forwarder.Cli.Commands
                 config = CreateDefaultConfig(_storagePath);
             }
 
+            if (!string.IsNullOrEmpty(_listenUri.ListenUri))
+            {
+                config.Api.ListenUri = _listenUri.ListenUri;
+                SeqForwarderConfig.Write(_storagePath.ConfigFilePath, config);
+            }
+
             var args = new List<string>
             {
                 "/LogFile=\"\"",
                 "/ShowCallStack",
                 "/storage=\"" + _storagePath.StorageRootPath + "\"",
-                "/listen=\"" + _listenUri.ListenUri + "\"",
                 GetType().Assembly.Location
             };
 
@@ -209,7 +214,7 @@ namespace Seq.Forwarder.Cli.Commands
                 cout.WriteLine($"Granting {_serviceCredentials.Username} rights to {config.Diagnostics.InternalLogPath}...");
                 GiveFullControl(config.Diagnostics.InternalLogPath, _serviceCredentials.Username);
 
-                var listenUri = MakeListenUriReservationPattern(_listenUri.ListenUri);
+                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
                 cout.WriteLine($"Adding URL reservation at {listenUri} for {_serviceCredentials.Username} (may request UAC elevation)...");
                 NetSh.AddUrlAcl(listenUri, _serviceCredentials.Username);
 
@@ -224,7 +229,7 @@ namespace Seq.Forwarder.Cli.Commands
                 cout.WriteLine($"Granting NT AUTHORITY\\LocalService account rights to {config.Diagnostics.InternalLogPath}...");
                 GiveFullControl(config.Diagnostics.InternalLogPath, "NT AUTHORITY\\LocalService");
 
-                var listenUri = MakeListenUriReservationPattern(_listenUri.ListenUri);
+                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
                 cout.WriteLine($"Adding URL reservation at {listenUri} for the Local Service account (may request UAC elevation)...");
                 NetSh.AddUrlAcl(listenUri, "NT AUTHORITY\\LocalService");
             }
@@ -280,6 +285,10 @@ namespace Seq.Forwarder.Cli.Commands
                 Storage =
                 {
                     BufferSizeBytes = 64*1024*1024
+                },
+                Api =
+                {
+                    ListenUri = "http://localhost:15341"
                 }
             };
 
