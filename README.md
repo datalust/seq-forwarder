@@ -36,7 +36,7 @@ can be specified on the command-line, like `User=` and `Email=` above, to tag th
 
 ### Building
 
-Visual Studio 2015 is required. While migrating from our internal CI no scripted build is set up yet - just build
+Visual Studio 2017 is required. While migrating from our internal CI no scripted build is set up yet - just build
 the solution in Release mode and grab the resulting binaries.
 
 The solution is currently a Windows-only .NET 4.5.2 application. .NET Core support is intended sometime after its RTM.
