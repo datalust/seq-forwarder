@@ -42,15 +42,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="autofac" Version="4.4.0" />
-    <PackageReference Include="lightningdb" Version="0.9.7" />
-    <PackageReference Include="nancy" Version="1.4.3" />
+    <PackageReference Include="autofac" Version="4.6.1" />
+    <PackageReference Include="lightningdb" Version="0.9.9" />
+    <PackageReference Include="nancy" Version="1.4.4" />
     <PackageReference Include="nancy.bootstrappers.autofac" Version="1.4.1" />
     <PackageReference Include="nancy.hosting.self" Version="1.4.1" />
-    <PackageReference Include="newtonsoft.json" Version="10.0.1" />
-    <PackageReference Include="serilog" Version="2.4.0" />
+    <PackageReference Include="newtonsoft.json" Version="10.0.3" />
+    <PackageReference Include="serilog" Version="2.5.0" />
     <PackageReference Include="serilog.formatting.compact" Version="1.0.0" />
-    <PackageReference Include="serilog.sinks.literate" Version="2.1.0" />
+    <PackageReference Include="serilog.sinks.console" Version="3.0.1" />
     <PackageReference Include="serilog.sinks.rollingfile" Version="3.3.0" />
   </ItemGroup>
 

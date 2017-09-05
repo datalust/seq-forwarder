@@ -14,7 +14,6 @@
 
 using System;
 using System.IO;
-using System.ServiceProcess;
 using Seq.Forwarder.ServiceProcess;
 using Seq.Forwarder.Util;
 
@@ -47,7 +46,7 @@ namespace Seq.Forwarder.Cli.Features
                 v => _storageRoot = Path.GetFullPath(v));
         }
 
-        string GetDefaultStorageRoot()
+        static string GetDefaultStorageRoot()
         {
             return Path.GetFullPath(Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
@@ -55,7 +54,7 @@ namespace Seq.Forwarder.Cli.Features
                 "Forwarder"));
         }
 
-        string TryQueryInstalledStorageRoot()
+        static string TryQueryInstalledStorageRoot()
         {
             if (ServiceConfiguration.GetServiceStoragePath(SeqForwarderWindowsService.WindowsServiceName, new StringWriter(), out var storage))
                 return storage;

@@ -94,7 +94,7 @@ namespace Seq.Forwarder.Cli.Commands
                     fileSizeLimitBytes: 1024*1024);
             
             if (Environment.UserInteractive)
-                loggerConfiguration.WriteTo.LiterateConsole(restrictedToMinimumLevel: LogEventLevel.Information);
+                loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
             return loggerConfiguration.CreateLogger();
         }

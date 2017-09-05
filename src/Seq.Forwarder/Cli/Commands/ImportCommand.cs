@@ -17,14 +17,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Seq.Forwarder.Cli;
 using Seq.Forwarder.Importer;
 using Serilog;
 using System.Linq;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
 
-namespace seq_import
+namespace Seq.Forwarder.Cli.Commands
 {
     [Command("import", "Import JSON log files directly into Seq")]
     class ImportCommand : Command
@@ -50,7 +49,7 @@ namespace seq_import
         protected override int Run(TextWriter cout)
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.LiterateConsole()
+                .WriteTo.Console()
                 .CreateLogger();
 
             try
