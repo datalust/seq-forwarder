@@ -18,6 +18,7 @@ using System.Text;
 using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Seq.Forwarder.ApiKeys;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
@@ -127,7 +128,7 @@ namespace Seq.Forwarder.Web.Api
 
             _logBuffer.Value.Enqueue(encoded);
             
-            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(_outputConfig.Value.ApiKey), "application/json");
+            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(_outputConfig.Value.DefaultApiKey), "application/json");
             response.StatusCode = HttpStatusCode.Created;
             return response;
         }

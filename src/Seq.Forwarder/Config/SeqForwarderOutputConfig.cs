@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
 using Newtonsoft.Json;
+using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Config
 {
@@ -31,7 +29,7 @@ namespace Seq.Forwarder.Config
         public string EncodedApiKey { get; set; }
 
         [JsonIgnore]
-        public string ApiKey
+        public string DefaultApiKey
         {
             get
             {
@@ -41,15 +39,7 @@ namespace Seq.Forwarder.Config
                 if (!EncodedApiKey.StartsWith(ProtectedDataPrefix))
                     return EncodedApiKey;
 
-                var pmk = EncodedApiKey.Substring(ProtectedDataPrefix.Length);
-                var parts = pmk.Split(new[] { '$' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != 2)
-                    throw new InvalidOperationException("API key format is invalid.");
-
-                var bytes = Convert.FromBase64String(parts[0]);
-                var salt = Convert.FromBase64String(parts[1]);
-                var decoded = ProtectedData.Unprotect(bytes, salt, DataProtectionScope.LocalMachine);
-                return Encoding.UTF8.GetString(decoded);
+                return MachineScopeDataProtection.Unprotect(EncodedApiKey.Substring(ProtectedDataPrefix.Length));
             }
             set
             {
@@ -59,12 +49,7 @@ namespace Seq.Forwarder.Config
                     return;
                 }
 
-                var salt = new byte[16];
-                using (var cp = new RNGCryptoServiceProvider())
-                    cp.GetBytes(salt);
-
-                var bytes = ProtectedData.Protect(Encoding.UTF8.GetBytes(value), salt, DataProtectionScope.LocalMachine);
-                EncodedApiKey = $"{ProtectedDataPrefix}{Convert.ToBase64String(bytes)}${Convert.ToBase64String(salt)}";
+                EncodedApiKey = $"{ProtectedDataPrefix}{MachineScopeDataProtection.Protect(value)}";
             }
         }
     }

@@ -86,7 +86,7 @@
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="0 0 0 10px">
                         <TextBox Text="{Binding ApiKey}" Margin="0 5px" Padding="5px"></TextBox>
                         <TextBlock TextWrapping="Wrap" Foreground="#777">
-                            If required by the server, an API key that the forwarder must use when connecting.
+                            An optional API key for the forwarder to use when connected applications do not specify one.
                         </TextBlock>
                     </StackPanel>
 

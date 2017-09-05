@@ -14,9 +14,8 @@
 
 using System;
 using System.IO;
+using Seq.Forwarder.ApiKeys;
 using Seq.Forwarder.Cli.Features;
-using Seq.Forwarder.Config;
-using Seq.Forwarder.Storage;
 using Serilog;
 
 namespace Seq.Forwarder.Cli.Commands
@@ -35,11 +34,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                using (var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes))
-                {
-                    buffer.Truncate();
-                }
+                ActiveLogBufferMap.Truncate(_storagePath.BufferPath);
                 return 0;
             }
             catch (Exception ex)

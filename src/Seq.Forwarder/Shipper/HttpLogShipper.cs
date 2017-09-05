@@ -32,6 +32,7 @@ namespace Seq.Forwarder.Shipper
         const string ApiKeyHeaderName = "X-Seq-ApiKey";
         const string BulkUploadResource = "api/events/raw";
 
+        readonly string _apiKey;
         readonly LogBuffer _logBuffer;
         readonly SeqForwarderOutputConfig _outputConfig;
         readonly HttpClient _httpClient;
@@ -47,8 +48,9 @@ namespace Seq.Forwarder.Shipper
 
         static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2), MaximumConnectionInterval = TimeSpan.FromMinutes(2);
 
-        public HttpLogShipper(LogBuffer logBuffer, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy)
+        public HttpLogShipper(LogBuffer logBuffer, string apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy)
         {
+            _apiKey = apiKey;
             _logBuffer = logBuffer ?? throw new ArgumentNullException(nameof(logBuffer));
             _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
             _serverResponseProxy = serverResponseProxy ?? throw new ArgumentNullException(nameof(serverResponseProxy));
@@ -144,9 +146,9 @@ namespace Seq.Forwarder.Shipper
                         CharSet = Encoding.UTF8.WebName
                     };
 
-                    if (_outputConfig.ApiKey != null)
+                    if (_apiKey != null)
                     {
-                        content.Headers.Add(ApiKeyHeaderName, _outputConfig.ApiKey);
+                        content.Headers.Add(ApiKeyHeaderName, _apiKey);
                     }
 
                     var result = await _httpClient.PostAsync(BulkUploadResource, content);
@@ -157,7 +159,7 @@ namespace Seq.Forwarder.Shipper
                         if (sendingSingles > 0)
                             sendingSingles--;
 
-                        _serverResponseProxy.ResponseReturned(_outputConfig.ApiKey, await result.Content.ReadAsStringAsync());
+                        _serverResponseProxy.SuccessResponseReturned(_apiKey, await result.Content.ReadAsStringAsync());
                         _nextRequiredLevelCheck = DateTime.UtcNow.Add(MaximumConnectionInterval);
                     }
                     else if (result.StatusCode == HttpStatusCode.BadRequest ||

@@ -15,6 +15,7 @@
 using System;
 using Autofac;
 using Nancy;
+using Seq.Forwarder.ApiKeys;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.ServiceProcess;
 using Seq.Forwarder.Shipper;

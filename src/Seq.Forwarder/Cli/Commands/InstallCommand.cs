@@ -265,7 +265,7 @@ namespace Seq.Forwarder.Cli.Commands
                 Output =
                 {
                     ServerUrl = "http://localhost:5341",
-                    ApiKey = null,
+                    DefaultApiKey = null,
                     EventBodyLimitBytes = 256 * 1024,
                     RawPayloadLimitBytes = 10 * 1024 * 1024
                 },
