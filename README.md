@@ -1,4 +1,4 @@
-# Seq Forwarder [![Build status](https://ci.appveyor.com/api/projects/status/qdvdn50xqwi43jkm/branch/master?svg=true)](https://ci.appveyor.com/project/seqlogs/seq-forwarder/branch/master) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq) [![Download](https://img.shields.io/github/release/datalust/seq-forwarder.svg)](https://github.com/datalust/seq-forwarder/releases)
+# Seq Forwarder [![Build status](https://ci.appveyor.com/api/projects/status/qdvdn50xqwi43jkm?svg=true)](https://ci.appveyor.com/project/datalust/seq-forwarder) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq) [![Download](https://img.shields.io/github/release/datalust/seq-forwarder.svg)](https://github.com/datalust/seq-forwarder/releases)
 
 [Seq Forwarder](http://blog.getseq.net/help-us-test-seq-forwarder/) is a client-side tool for sending log data to Seq.
 
