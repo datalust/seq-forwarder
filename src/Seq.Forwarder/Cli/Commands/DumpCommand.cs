@@ -17,7 +17,7 @@ using System.IO;
 using System.Text;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
-using Seq.Forwarder.Storage;
+using Seq.Forwarder.Multiplexing;
 using Serilog;
 
 namespace Seq.Forwarder.Cli.Commands
@@ -37,8 +37,9 @@ namespace Seq.Forwarder.Cli.Commands
             try
             {
                 var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                using (var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes))
+                using (var buffer = new ActiveLogBufferMap(_storagePath.BufferPath, config.Storage, config.Output, new UnsupportedHttpLogShipperFactory()))
                 {
+                    buffer.Load();
                     buffer.Enumerate((k, v) =>
                     {
                         var s = Encoding.UTF8.GetString(v);

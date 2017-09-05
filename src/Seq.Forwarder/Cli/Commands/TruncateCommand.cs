@@ -14,8 +14,8 @@
 
 using System;
 using System.IO;
-using Seq.Forwarder.ApiKeys;
 using Seq.Forwarder.Cli.Features;
+using Seq.Forwarder.Multiplexing;
 using Serilog;
 
 namespace Seq.Forwarder.Cli.Commands

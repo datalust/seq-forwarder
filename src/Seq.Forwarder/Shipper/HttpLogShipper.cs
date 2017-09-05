@@ -24,12 +24,12 @@ using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
 using System.Threading.Tasks;
+using Seq.Forwarder.Multiplexing;
 
 namespace Seq.Forwarder.Shipper
 {
     sealed class HttpLogShipper : IDisposable
     {
-        const string ApiKeyHeaderName = "X-Seq-ApiKey";
         const string BulkUploadResource = "api/events/raw";
 
         readonly string _apiKey;
@@ -148,7 +148,7 @@ namespace Seq.Forwarder.Shipper
 
                     if (_apiKey != null)
                     {
-                        content.Headers.Add(ApiKeyHeaderName, _apiKey);
+                        content.Headers.Add(SeqApi.ApiKeyHeaderName, _apiKey);
                     }
 
                     var result = await _httpClient.PostAsync(BulkUploadResource, content);

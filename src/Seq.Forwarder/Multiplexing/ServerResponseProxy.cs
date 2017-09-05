@@ -14,7 +14,7 @@
 
 using System.Collections.Generic;
 
-namespace Seq.Forwarder.Shipper
+namespace Seq.Forwarder.Multiplexing
 {
     class ServerResponseProxy
     {

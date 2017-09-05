@@ -14,15 +14,15 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Seq.Forwarder.ApiKeys;
 using Seq.Forwarder.Config;
-using Seq.Forwarder.Storage;
-using Serilog;
+using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.Shipper;
+using Serilog;
 
 namespace Seq.Forwarder.Web.Api
 {
@@ -30,16 +30,16 @@ namespace Seq.Forwarder.Web.Api
     {
         static ILogger IngestionLog => Diagnostics.IngestionLog.Log;
 
-        readonly Lazy<LogBuffer> _logBuffer;
+        readonly Lazy<ActiveLogBufferMap> _logBufferMap;
         readonly Lazy<SeqForwarderOutputConfig> _outputConfig;
         readonly Lazy<ServerResponseProxy> _serverResponseProxy;
 
         readonly JsonSerializer _rawSerializer = JsonSerializer.Create(
             new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
 
-        public RawEventsModule(Lazy<LogBuffer> logBuffer, Lazy<SeqForwarderOutputConfig> outputConfig, Lazy<ServerResponseProxy> serverResponseProxy)
+        public RawEventsModule(Lazy<ActiveLogBufferMap> logBufferMap, Lazy<SeqForwarderOutputConfig> outputConfig, Lazy<ServerResponseProxy> serverResponseProxy)
         {
-            _logBuffer = logBuffer;
+            _logBufferMap = logBufferMap;
             _outputConfig = outputConfig;
             _serverResponseProxy = serverResponseProxy;
 
@@ -95,8 +95,9 @@ namespace Seq.Forwarder.Web.Api
                     IngestionLog.Debug("Invalid payload from {ClientHostIP} due to oversized event; first {StartToLog} chars: {DocumentStart:l}", Request.UserHostAddress, startToLog, prefix);
 
                     var jo = e as JObject;
-                    var timestamp = ((string)(dynamic)jo?.GetValue("Timestamp")) ?? DateTime.UtcNow.ToString("o");
-                    var level = ((string)(dynamic)jo?.GetValue("Level")) ?? "Warning";
+                    // ReSharper disable SuspiciousTypeConversion.Global
+                    var timestamp = (string)(dynamic)jo?.GetValue("Timestamp") ?? DateTime.UtcNow.ToString("o");
+                    var level = (string)(dynamic)jo?.GetValue("Level") ?? "Warning";
 
                     if (jo != null)
                     {
@@ -126,11 +127,26 @@ namespace Seq.Forwarder.Web.Api
                 i++;
             }
 
-            _logBuffer.Value.Enqueue(encoded);
+            var apiKey = GetRequestApiKeyToken();
+            _logBufferMap.Value.GetLogBuffer(apiKey).Enqueue(encoded);
             
-            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(_outputConfig.Value.DefaultApiKey), "application/json");
+            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(apiKey), "application/json");
             response.StatusCode = HttpStatusCode.Created;
             return response;
+        }
+
+        string GetRequestApiKeyToken()
+        {
+            var apiKeyToken = Request.Headers[SeqApi.ApiKeyHeaderName].FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(apiKeyToken))
+                apiKeyToken = (string)Request.Query.apiKey;
+
+            var normalized = apiKeyToken?.Trim();
+            if (string.IsNullOrEmpty(normalized))
+                return null;
+
+            return normalized;
         }
     }
 }

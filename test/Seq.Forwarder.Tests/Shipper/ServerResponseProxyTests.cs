@@ -1,4 +1,4 @@
-﻿using Seq.Forwarder.ApiKeys;
+﻿using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.Shipper;
 using Seq.Forwarder.Tests.Support;
 using Xunit;

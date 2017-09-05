@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Seq.Forwarder.Shipper;
 using Seq.Forwarder.Storage;
 
-namespace Seq.Forwarder.ApiKeys
+namespace Seq.Forwarder.Multiplexing
 {
-    sealed class ActiveLogBuffer : IDisposable
+    interface ILogShipperFactory
     {
-        public HttpLogShipper Shipper { get; }
-        public LogBuffer LogBuffer { get; }
-
-        public ActiveLogBuffer(LogBuffer logBuffer, HttpLogShipper logShipper)
-        {
-            LogBuffer = logBuffer ?? throw new ArgumentNullException(nameof(logBuffer));
-            Shipper = logShipper ?? throw new ArgumentNullException(nameof(logShipper));
-        }
-
-        public void Dispose()
-        {
-            Shipper.Dispose();
-            LogBuffer.Dispose();
-        }
+        HttpLogShipper Create(LogBuffer logBuffer, string apiKey);
     }
 }
