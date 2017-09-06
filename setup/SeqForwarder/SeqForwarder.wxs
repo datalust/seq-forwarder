@@ -2,60 +2,54 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
         <DirectoryRef Id="INSTALLFOLDER">
-            <Component Id="cmpDA27922DC39ABEE4AED51766786E4CFD" Guid="{4BBE7800-BC71-4F67-824A-E4D30E7AF343}">
+            <Component Id="cmpDA27922DC39ABEE4AED51766786E4CFD" Guid="{00D1E322-1D4C-4370-87BC-6335222E4D15}">
                 <File Id="fil35A245A4D0EADE39BA1ACE4C3747CE4D" KeyPath="yes" Source="$(var.BasePath)\Autofac.dll" />
             </Component>
-            <Component Id="cmp2A2B27F5AD386D451F6AD02173DDB353" Guid="{2DF8B008-E890-4D29-8393-3DA2FAF28182}">
+            <Component Id="cmp2A2B27F5AD386D451F6AD02173DDB353" Guid="{CBF838D4-CEF3-4702-BB6F-69A3CC117DB3}">
                 <File Id="fil510301A614A8F3D47B8A045FFEEF1D35" KeyPath="yes" Source="$(var.BasePath)\favicon.ico" />
             </Component>
-            <Component Id="cmp48154C856B87ADEC49D8FEE6179FF03A" Guid="{D0A209B5-061E-45AD-B41D-257C497197E9}">
+            <Component Id="cmp48154C856B87ADEC49D8FEE6179FF03A" Guid="{7352B5E3-AAEF-45B4-90CD-47327FF16F42}">
                 <File Id="fil41AF613B08BA33B207F6DC83C4917150" KeyPath="yes" Source="$(var.BasePath)\LightningDB.dll" />
             </Component>
-            <Component Id="cmpE6945F57B9DA8C7CEA0B4D3732ED5DA1" Guid="{F7C5E6CA-1543-4190-9F5C-E8A43A71E396}">
+            <Component Id="cmpE6945F57B9DA8C7CEA0B4D3732ED5DA1" Guid="{002E6B00-F8A2-4269-A1CB-81B2B1E5C22A}">
                 <File Id="fil55EDE175360A943150E17C54B6CDBC10" KeyPath="yes" Source="$(var.BasePath)\lmdb.dll" />
             </Component>
-            <Component Id="cmp940F32D6B688098DD3F9EDF199414DE3" Guid="{26E2C77E-DB2C-4479-8143-1E746BFAC789}">
+            <Component Id="cmp940F32D6B688098DD3F9EDF199414DE3" Guid="{818ECE02-ECB3-4A72-BD04-9B0BA722E1E4}">
                 <File Id="filF29CAC3406B7FD281FE44DE872EE3058" KeyPath="yes" Source="$(var.BasePath)\Nancy.Bootstrappers.Autofac.dll" />
             </Component>
-            <Component Id="cmp3C40385889C0A6C29C06D1F58520BED2" Guid="{195DE8DA-4336-4826-B1D1-B5C88556EFCA}">
+            <Component Id="cmp3C40385889C0A6C29C06D1F58520BED2" Guid="{FA410C8E-A663-4403-86F6-ABB7D0E5B502}">
                 <File Id="fil59B7CA28C1ADB6A9766F27CC284885BD" KeyPath="yes" Source="$(var.BasePath)\Nancy.dll" />
             </Component>
-            <Component Id="cmp133280381E1480D0340F6512570B789F" Guid="{6BAE8F07-6A59-4DAA-9A98-E3414375A2A0}">
+            <Component Id="cmp133280381E1480D0340F6512570B789F" Guid="{2707DBD3-0EDB-4C3F-9FB7-90E0D72B992D}">
                 <File Id="filD47E65C2D9809A6FA596D96A0C2EB0FF" KeyPath="yes" Source="$(var.BasePath)\Nancy.Hosting.Self.dll" />
             </Component>
-            <Component Id="cmpBC4FC00A26E7D32479D42D3411317FC5" Guid="{87EBE604-EBB9-4885-9002-18197A30B02F}">
+            <Component Id="cmpBC4FC00A26E7D32479D42D3411317FC5" Guid="{62B7EA02-9A2A-4DC0-BB34-8FBBCAD1E7BD}">
                 <File Id="fil90A8AAD9FC612906D405476D61CEA3F4" KeyPath="yes" Source="$(var.BasePath)\Newtonsoft.Json.dll" />
             </Component>
-            <Component Id="cmp48F8563799218FAA04FAE2C1421BB6DA" Guid="{FEC7334B-8EAC-4A2B-ABD5-3326EF33A08E}">
+            <Component Id="cmp48F8563799218FAA04FAE2C1421BB6DA" Guid="{F5EC02B6-B2F1-48B5-B782-1B1E463CAA73}">
                 <File Id="fil47156FA1F974CD586257EF7433CC7AFC" KeyPath="yes" Source="$(var.BasePath)\seq-forwarder.exe" />
             </Component>
-            <Component Id="cmpAF5B86F5776989B653A9B1FB1ABE9AE4" Guid="{C8AF5BE4-61E0-4014-9301-C36FCB952A7E}">
+            <Component Id="cmpAF5B86F5776989B653A9B1FB1ABE9AE4" Guid="{BED1B237-9FE1-41CE-8AF4-C62F1F6B8F8D}">
                 <File Id="fil2DC8EDE65F4F2999916D0ABEF954E7B4" KeyPath="yes" Source="$(var.BasePath)\seq-forwarder.exe.config" />
             </Component>
             
-            <Component Id="cmpDD8AD4E452E0AB61B8413D84427F77C5" Guid="{E30F6209-B1DC-4F4A-B3CE-C9CA2F601C83}">
-                <File Id="fil567042DA1EF022EA1732B2D41CD35C18" KeyPath="yes" Source="$(var.BasePath)\seq-forwarder.runtimeconfig.dev.json" />
-            </Component>
-            <Component Id="cmp30AC7CC962CC421371F7A74B5E392687" Guid="{E7780D50-8E80-4B9B-B318-D9A42A7B9068}">
-                <File Id="fil4066CD1D25962146D2CA42A5EF06101C" KeyPath="yes" Source="$(var.BasePath)\seq-forwarder.runtimeconfig.json" />
-            </Component>
-            <Component Id="cmp74A2C73F11C177073B0A672936A0D5EB" Guid="{FD65A70D-503C-4C81-AF44-B4028846EFCD}">
+            <Component Id="cmp74A2C73F11C177073B0A672936A0D5EB" Guid="{BD560ACE-0729-49DC-989B-781B4F1CDF0C}">
                 <File Id="fil1CF141D24266A4E5F331DDFE02166A27" KeyPath="yes" Source="$(var.BasePath)\Serilog.dll" />
             </Component>
-            <Component Id="cmpC08CEB1C24E4A6DA79EE83CFD8BDCD60" Guid="{342F38BD-4B1B-4570-AFD8-468A3BC0C8F6}">
+            <Component Id="cmpC08CEB1C24E4A6DA79EE83CFD8BDCD60" Guid="{AB609F69-C28B-4C83-A73F-EB92AD5240D5}">
                 <File Id="filD89F64F083730E2B8CC0DEE7002EF506" KeyPath="yes" Source="$(var.BasePath)\Serilog.Formatting.Compact.dll" />
             </Component>
-            <Component Id="cmp49818C715FF04B8E95F7B53BDDD323EF" Guid="{A8FD8AFB-1987-4FB5-BA1E-0484B8E3E21D}">
+            <Component Id="cmp539EB192BE11EA8C5B17EFB0CC1DDCEB" Guid="{1530435A-DF85-4BAB-99B0-D0A9031E394D}">
+                <File Id="filB637049630FB5D2AC00236DBD60DD2BE" KeyPath="yes" Source="$(var.BasePath)\Serilog.Sinks.Console.dll" />
+            </Component>
+            <Component Id="cmp49818C715FF04B8E95F7B53BDDD323EF" Guid="{DF82800A-D9AC-4EAF-A7E2-96869DA08DBB}">
                 <File Id="fil1A12B15365165DDBE60433B150808BEE" KeyPath="yes" Source="$(var.BasePath)\Serilog.Sinks.File.dll" />
             </Component>
-            <Component Id="cmp02B65BB0E7725E00772221A054BE0F6D" Guid="{F4122FFB-FC47-4457-AEDB-0D705D8A7D14}">
-                <File Id="fil6E564047DBBA2340E7D8DB33266CF3CA" KeyPath="yes" Source="$(var.BasePath)\Serilog.Sinks.Literate.dll" />
-            </Component>
-            <Component Id="cmp5F1AA7FFD17911A668851FA15EE0CD1E" Guid="{35A72DF1-EBCA-4209-9303-DC7CC5B0D1FB}">
+            <Component Id="cmp5F1AA7FFD17911A668851FA15EE0CD1E" Guid="{E7902C4F-8EA9-4D6B-AEC6-AA7FC7814CAF}">
                 <File Id="fil6DF069D04BE2DE8E81DEBB4B1DE25568" KeyPath="yes" Source="$(var.BasePath)\Serilog.Sinks.RollingFile.dll" />
             </Component>
             <Directory Id="dir62ACF81DE3B90724F16085CDF3C192DC" Name="Attribution">
-                <Component Id="cmpF91E9B989C748AD221E3EBF6B096037C" Guid="{661EC7CF-23E5-4156-93E1-4F2023B15055}">
+                <Component Id="cmpF91E9B989C748AD221E3EBF6B096037C" Guid="{28A2825E-301F-4BCE-9A28-C34EF5517172}">
                     <File Id="fil8457E1AB783E7733E2D421ECA491A606" KeyPath="yes" Source="$(var.BasePath)\Attribution\Nancy Libraries License.txt" />
                 </Component>
             </Directory>
@@ -74,12 +68,10 @@
             <ComponentRef Id="cmp48F8563799218FAA04FAE2C1421BB6DA" />
             <ComponentRef Id="cmpAF5B86F5776989B653A9B1FB1ABE9AE4" />
             
-            <ComponentRef Id="cmpDD8AD4E452E0AB61B8413D84427F77C5" />
-            <ComponentRef Id="cmp30AC7CC962CC421371F7A74B5E392687" />
             <ComponentRef Id="cmp74A2C73F11C177073B0A672936A0D5EB" />
             <ComponentRef Id="cmpC08CEB1C24E4A6DA79EE83CFD8BDCD60" />
+            <ComponentRef Id="cmp539EB192BE11EA8C5B17EFB0CC1DDCEB" />
             <ComponentRef Id="cmp49818C715FF04B8E95F7B53BDDD323EF" />
-            <ComponentRef Id="cmp02B65BB0E7725E00772221A054BE0F6D" />
             <ComponentRef Id="cmp5F1AA7FFD17911A668851FA15EE0CD1E" />
             <ComponentRef Id="cmpF91E9B989C748AD221E3EBF6B096037C" />
         </ComponentGroup>

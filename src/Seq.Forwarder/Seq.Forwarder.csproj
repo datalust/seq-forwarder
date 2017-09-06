@@ -18,13 +18,11 @@
     <Description>Seq HTTP Log Forwarder</Description>
     <Copyright>Copyright © Datalust Pty Ltd and contributors 2017</Copyright>
     <AssemblyName>seq-forwarder</AssemblyName>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Attribution\Nancy Libraries License.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lmdb.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="favicon.ico">
