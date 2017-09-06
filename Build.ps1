@@ -34,6 +34,7 @@ function Update-WixVersion($version)
 function Execute-MSBuild
 {
 	& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+	if($LASTEXITCODE -ne 0) { exit 1 }
 }
 
 function Execute-Tests
@@ -50,6 +51,7 @@ function Publish-Artifacts($version)
 {
 	mkdir ./artifacts
 	mv ./setup/SeqForwarder/bin/Release/SeqForwarder.msi ./artifacts/SeqForwarder-$version-pre.msi
+	if($LASTEXITCODE -ne 0) { exit 1 }
 }
 
 Push-Location $PSScriptRoot
