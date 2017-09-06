@@ -21,8 +21,10 @@ function Update-WixVersion($version)
 
 function Execute-MSBuild($version, $suffix)
 {
+	Write-Output "Building $version (suffix=$suffix)"
+
 	if ($suffix) {
-		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:Version=$version-* /p:VersionSuffix=$suffix
+		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version /p:VersionSuffix=$suffix
 	} else {
 		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version
 	}
@@ -59,9 +61,9 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 
 Clean-Output
 Restore-Packages
-Update-WixVersion($version)
-Execute-MSBuild($version, $suffix)
+Update-WixVersion $version
+Execute-MSBuild $version $suffix
 Execute-Tests
-Publish-Artifacts($version, $suffix)
+Publish-Artifacts $version $suffix
 
 Pop-Location
