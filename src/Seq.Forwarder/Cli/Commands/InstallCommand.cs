@@ -288,7 +288,7 @@ namespace Seq.Forwarder.Cli.Commands
                 },
                 Api =
                 {
-                    ListenUri = "http://localhost:15341"
+                    ListenUri = SeqForwarderOutputConfig.DefaultListenUri
                 }
             };
 

@@ -21,6 +21,8 @@ namespace Seq.Forwarder.Config
     {
         const string ProtectedDataPrefix = "pd.";
 
+        public const string DefaultListenUri = "http://localhost:15341";
+
         public string ServerUrl { get; set; }
         public ulong EventBodyLimitBytes { get; set; }
         public ulong RawPayloadLimitBytes { get; set; }

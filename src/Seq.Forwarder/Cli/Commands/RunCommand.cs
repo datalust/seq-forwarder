@@ -74,7 +74,9 @@ namespace Seq.Forwarder.Cli.Commands
             Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
 
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri ?? config.Api.ListenUri, config));
+
+            var listenUri = _listenUri.ListenUri ?? config.Api.ListenUri ?? SeqForwarderOutputConfig.DefaultListenUri;
+            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, listenUri, config));
 
             var container = builder.Build();
             var exit = Environment.UserInteractive
@@ -172,7 +174,7 @@ namespace Seq.Forwarder.Cli.Commands
             Console.WriteLine();
             Write(" Seq Forwarder", ConsoleColor.White);
             Write(" ──", ConsoleColor.DarkGray);
-            Write(" © 2016 Datalust Pty Ltd", ConsoleColor.Gray);
+            Write(" © 2017 Datalust Pty Ltd", ConsoleColor.Gray);
             Console.WriteLine();
             Write("─", ConsoleColor.DarkGray, 47);
             Console.WriteLine();
