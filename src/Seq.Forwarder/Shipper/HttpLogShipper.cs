@@ -28,7 +28,7 @@ using Seq.Forwarder.Multiplexing;
 
 namespace Seq.Forwarder.Shipper
 {
-    sealed class HttpLogShipper : IDisposable
+    sealed class HttpLogShipper : LogShipper
     {
         const string BulkUploadResource = "api/events/raw";
 
@@ -68,7 +68,7 @@ namespace Seq.Forwarder.Shipper
             _timer = new Timer(s => OnTick());
         }
 
-        public void Start()
+        public override void Start()
         {
             lock (_stateLock)
             {
@@ -86,7 +86,7 @@ namespace Seq.Forwarder.Shipper
             }
         }
 
-        public void Stop()
+        public override void Stop()
         {
             lock (_stateLock)
             {
@@ -104,7 +104,7 @@ namespace Seq.Forwarder.Shipper
                 wh.WaitOne();
         }
         
-        public void Dispose()
+        public override void Dispose()
         {
             Stop();
         }

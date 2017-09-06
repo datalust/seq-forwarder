@@ -138,11 +138,11 @@ namespace Seq.Forwarder.Multiplexing
                         _noApiKeyLogBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, _outputConfig.DefaultApiKey));
                         _noApiKeyLogBuffer.Shipper.Start();
                     }
-                    return _noApiKeyLogBuffer.LogBuffer;
+                    return _noApiKeyLogBuffer.Buffer;
                 }
 
                 if (_buffersByApiKey.TryGetValue(apiKey, out var existing))
-                    return existing.LogBuffer;
+                    return existing.Buffer;
 
                 var subfolder = Path.Combine(_bufferPath, Guid.NewGuid().ToString("n"));
                 _log.Information("Creating a new API key-specific log buffer in {Path}", subfolder);
@@ -175,7 +175,7 @@ namespace Seq.Forwarder.Multiplexing
             {
                 foreach (var buffer in OpenBuffers)
                 {
-                    buffer.LogBuffer.Enumerate(action);
+                    buffer.Buffer.Enumerate(action);
                 }
             }
         }

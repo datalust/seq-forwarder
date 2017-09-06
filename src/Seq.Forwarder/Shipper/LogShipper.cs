@@ -13,16 +13,13 @@
 // limitations under the License.
 
 using System;
-using Seq.Forwarder.Shipper;
-using Seq.Forwarder.Storage;
 
-namespace Seq.Forwarder.Multiplexing
+namespace Seq.Forwarder.Shipper
 {
-    class UnsupportedHttpLogShipperFactory : ILogShipperFactory
+    abstract class LogShipper : IDisposable
     {
-        public HttpLogShipper Create(LogBuffer logBuffer, string apiKey)
-        {
-            throw new NotSupportedException();
-        }
+        public abstract void Start();
+        public abstract void Stop();
+        public abstract void Dispose();
     }
 }

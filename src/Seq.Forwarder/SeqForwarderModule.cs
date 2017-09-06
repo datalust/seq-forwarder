@@ -53,7 +53,7 @@ namespace Seq.Forwarder
                 .WithParameter("bufferPath", _bufferPath)
                 .SingleInstance();
 
-            builder.RegisterType<RuntimeHttpLogShipperFactory>().As<ILogShipperFactory>();
+            builder.RegisterType<HttpLogShipperFactory>().As<ILogShipperFactory>();
             builder.RegisterInstance(_config.Storage);
             builder.RegisterInstance(_config.Output);
             builder.RegisterType<ServerResponseProxy>().SingleInstance();

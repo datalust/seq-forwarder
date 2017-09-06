@@ -19,18 +19,18 @@ using Seq.Forwarder.Storage;
 
 namespace Seq.Forwarder.Multiplexing
 {
-    class RuntimeHttpLogShipperFactory : ILogShipperFactory
+    class HttpLogShipperFactory : ILogShipperFactory
     {
         readonly ServerResponseProxy _serverResponseProxy;
         readonly SeqForwarderOutputConfig _outputConfig;
 
-        public RuntimeHttpLogShipperFactory(ServerResponseProxy serverResponseProxy, SeqForwarderOutputConfig outputConfig)
+        public HttpLogShipperFactory(ServerResponseProxy serverResponseProxy, SeqForwarderOutputConfig outputConfig)
         {
             _serverResponseProxy = serverResponseProxy ?? throw new ArgumentNullException(nameof(serverResponseProxy));
             _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
         }
 
-        public HttpLogShipper Create(LogBuffer logBuffer, string apiKey)
+        public LogShipper Create(LogBuffer logBuffer, string apiKey)
         {
             return new HttpLogShipper(logBuffer, apiKey, _outputConfig, _serverResponseProxy);
         }
