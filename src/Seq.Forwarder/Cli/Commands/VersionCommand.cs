@@ -22,7 +22,7 @@ namespace Seq.Forwarder.Cli.Commands
     {
         protected override int Run(TextWriter cout)
         {
-            var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            var version = typeof(VersionCommand).GetTypeInfo().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
             cout.WriteLine(version);
             return 0;
         }

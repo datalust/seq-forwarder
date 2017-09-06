@@ -71,7 +71,7 @@ namespace Seq.Forwarder.Multiplexing
                     }
                     else
                     {
-                        _noApiKeyLogBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, _outputConfig.DefaultApiKey));
+                        _noApiKeyLogBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, _outputConfig.ApiKey));
                     }
                 }
 
@@ -135,7 +135,7 @@ namespace Seq.Forwarder.Multiplexing
                     {
                         _log.Information("Creating a new default log buffer in {Path}", _bufferPath);
                         var buffer = new LogBuffer(_bufferPath, _bufferSizeBytes);
-                        _noApiKeyLogBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, _outputConfig.DefaultApiKey));
+                        _noApiKeyLogBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, _outputConfig.ApiKey));
                         _noApiKeyLogBuffer.Shipper.Start();
                     }
                     return _noApiKeyLogBuffer.Buffer;

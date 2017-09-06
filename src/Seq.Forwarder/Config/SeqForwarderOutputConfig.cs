@@ -29,7 +29,7 @@ namespace Seq.Forwarder.Config
         public string EncodedApiKey { get; set; }
 
         [JsonIgnore]
-        public string DefaultApiKey
+        public string ApiKey
         {
             get
             {

@@ -16,9 +16,11 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <AssemblyTitle>Seq.Forwarder</AssemblyTitle>
     <Description>Seq HTTP Log Forwarder</Description>
-    <Copyright>Copyright © Datalust Pty Ltd and contributors 2017</Copyright>
+    <Copyright>Copyright © Datalust Pty Ltd and Contributors 2017</Copyright>
     <AssemblyName>seq-forwarder</AssemblyName>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
+    <GenerateAssemblyVersionAttribute>True</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>True</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
 
   <ItemGroup>
