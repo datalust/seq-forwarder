@@ -16,6 +16,6 @@ namespace Seq.Forwarder.Config
 {
     class SeqForwarderStorageConfig
     {
-        public ulong BufferSizeBytes { get; set; }
+        public ulong BufferSizeBytes { get; set; } = 64 * 1024 * 1024;
     }
 }

@@ -21,11 +21,9 @@ namespace Seq.Forwarder.Config
     {
         const string ProtectedDataPrefix = "pd.";
 
-        public const string DefaultListenUri = "http://localhost:15341";
-
-        public string ServerUrl { get; set; }
-        public ulong EventBodyLimitBytes { get; set; }
-        public ulong RawPayloadLimitBytes { get; set; }
+        public string ServerUrl { get; set; } = "http://localhost:5341";
+        public ulong EventBodyLimitBytes { get; set; } = 256 * 1024;
+        public ulong RawPayloadLimitBytes { get; set; } = 10 * 1024 * 1024;
 
         [JsonProperty("apiKey")]
         public string EncodedApiKey { get; set; }

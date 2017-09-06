@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.IO;
 using Serilog.Events;
 
 namespace Seq.Forwarder.Config
 {
     class SeqForwarderDiagnosticConfig
     {
-        public string InternalLogPath { get; set; }
-        public LogEventLevel InternalLoggingLevel { get; set; }
+        public string InternalLogPath { get; set; } = GetDefaultInternalLogPath();
+        public LogEventLevel InternalLoggingLevel { get; set; } = LogEventLevel.Information;
+
+        public static string GetDefaultInternalLogPath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Seq\Logs\");
+        }
     }
 }

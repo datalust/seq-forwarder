@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Seq.Forwarder.Config
 {
     class SeqForwarderApiConfig
     {
-        public string ListenUri { get; set; }
+        public string ListenUri { get; set; } = "http://localhost:15341";
     }
 }

@@ -64,7 +64,7 @@ namespace Seq.Forwarder.Cli.Commands
             {
                 var logger = CreateLogger(
                     LogEventLevel.Information,
-                    InstallCommand.GetDefaultInternalLogPath());
+                    SeqForwarderDiagnosticConfig.GetDefaultInternalLogPath());
 
                 logger.Fatal(ex, "Failed to load configuration from {ConfigFilePath}", _storagePath.ConfigFilePath);
                 (logger as IDisposable)?.Dispose();
@@ -74,9 +74,7 @@ namespace Seq.Forwarder.Cli.Commands
             Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
 
             var builder = new ContainerBuilder();
-
-            var listenUri = _listenUri.ListenUri ?? config.Api.ListenUri ?? SeqForwarderOutputConfig.DefaultListenUri;
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, listenUri, config));
+            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri ?? config.Api.ListenUri, config));
 
             var container = builder.Build();
             var exit = Environment.UserInteractive
