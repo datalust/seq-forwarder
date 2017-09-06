@@ -78,7 +78,7 @@ namespace Seq.Forwarder.Cli.Commands
                     if (!string.IsNullOrEmpty(config.Output.ServerUrl))
                     {
                         serverUrl = config.Output.ServerUrl;
-                        apiKey = _serverInformation.IsApiKeySpecified ? _serverInformation.ApiKey : config.Output.DefaultApiKey;
+                        apiKey = _serverInformation.IsApiKeySpecified ? _serverInformation.ApiKey : config.Output.ApiKey;
                     }
                 }
 
