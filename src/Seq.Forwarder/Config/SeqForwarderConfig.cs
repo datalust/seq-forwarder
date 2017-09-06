@@ -49,5 +49,6 @@ namespace Seq.Forwarder.Config
         public SeqForwarderDiagnosticConfig Diagnostics { get; set; } = new SeqForwarderDiagnosticConfig();
         public SeqForwarderOutputConfig Output { get; set; } = new SeqForwarderOutputConfig();
         public SeqForwarderStorageConfig Storage { get; set; } = new SeqForwarderStorageConfig();
+        public SeqForwarderApiConfig Api { get; set; } = new SeqForwarderApiConfig();
     }
 }

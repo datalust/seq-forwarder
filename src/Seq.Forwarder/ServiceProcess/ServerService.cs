@@ -24,16 +24,17 @@ namespace Seq.Forwarder.ServiceProcess
     {
         readonly Lazy<ActiveLogBufferMap> _logBufferMap;
         readonly NancyHost _nancyHost;
-        public const string ListenUri = "http://localhost:15341";
+        string _listenUri;
 
-        public ServerService(NancyBootstrapper bootstrapper, Lazy<ActiveLogBufferMap> logBufferMap)
+        public ServerService(NancyBootstrapper bootstrapper, Lazy<ActiveLogBufferMap> logBufferMap, string listenUri)
         {
             _logBufferMap = logBufferMap;
+            _listenUri = listenUri;
             var hc = new HostConfiguration
             {
                 UrlReservations = { CreateAutomatically = Environment.UserInteractive }
             };
-            _nancyHost = new NancyHost(bootstrapper, hc, new Uri(ListenUri));
+            _nancyHost = new NancyHost(bootstrapper, hc, new Uri(_listenUri));
         }
 
         public void Start()
@@ -44,7 +45,7 @@ namespace Seq.Forwarder.ServiceProcess
 
                 _nancyHost.Start();
 
-                Log.Information("Seq Forwarder listening on {ListenUri}", ListenUri);
+                Log.Information("Seq Forwarder listening on {ListenUri}", _listenUri);
 
                 _logBufferMap.Value.Load();
                 _logBufferMap.Value.Start();
