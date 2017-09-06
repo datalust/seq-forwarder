@@ -22,7 +22,7 @@ function Update-WixVersion($version)
 function Execute-MSBuild($version, $suffix)
 {
 	if ($suffix) {
-		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version /p:VersionSuffix=$suffix
+		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version-* /p:VersionSuffix=$suffix
 	} else {
 		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version
 	}
