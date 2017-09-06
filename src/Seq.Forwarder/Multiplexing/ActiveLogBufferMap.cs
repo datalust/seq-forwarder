@@ -44,6 +44,8 @@ namespace Seq.Forwarder.Multiplexing
             _bufferPath = bufferPath ?? throw new ArgumentNullException(nameof(bufferPath));
         }
 
+        // The odd three-stage initialization improves our chances of correctly tearing down the `LightningEnvironment`s within
+        // `LogBuffer`s in the event of a failure during start-up. See: https://github.com/CoreyKaylor/Lightning.NET/blob/master/src/LightningDB/LightningEnvironment.cs#L252
         public void Load()
         {
             // At startup, we look for buffers and either delete them if they're empty, or load them
@@ -83,6 +85,8 @@ namespace Seq.Forwarder.Multiplexing
                     }
 
                     _log.Information("Loading an API-key specific buffer in {Path}", subfolder);
+                    var apiKey = MachineScopeDataProtection.Unprotect(File.ReadAllText(encodedApiKeyFilePath));
+
                     var buffer = new LogBuffer(subfolder, _bufferSizeBytes);
                     if (buffer.Peek(0).Length == 0)
                     {
@@ -92,7 +96,6 @@ namespace Seq.Forwarder.Multiplexing
                     }
                     else
                     {
-                        var apiKey = MachineScopeDataProtection.Unprotect(File.ReadAllText(encodedApiKeyFilePath));
                         var activeBuffer = new ActiveLogBuffer(buffer, _shipperFactory.Create(buffer, apiKey));
                         _buffersByApiKey.Add(apiKey, activeBuffer);
                     }
