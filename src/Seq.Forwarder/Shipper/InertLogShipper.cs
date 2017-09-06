@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright 2017 Datalust Pty Ltd and Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Seq.Forwarder.Config
+namespace Seq.Forwarder.Shipper
 {
-    class SeqForwarderStorageConfig
+    class InertLogShipper : LogShipper
     {
-        public ulong BufferSizeBytes { get; set; } = 64 * 1024 * 1024;
+        public override void Start()
+        {            
+        }
+
+        public override void Stop()
+        {
+        }
+
+        public override void Dispose()
+        {
+        }
     }
 }

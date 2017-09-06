@@ -30,19 +30,19 @@ namespace Seq.Forwarder.Administration
             DataContext = _viewModel = new ConfigurationViewModel(Dispatcher);
         }
 
-        private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (!_viewModel.CanClose(this))
                 e.Cancel = true;
         }
 
-        private void OnClosing(object sender, RoutedEventArgs e)
+        void OnClosing(object sender, RoutedEventArgs e)
         {
             if (_viewModel.CanClose(this))
                 Close();
         }
 
-        private void OnNext(object sender, RoutedEventArgs e)
+        void OnNext(object sender, RoutedEventArgs e)
         {
             _viewModel.Next(this);
         }

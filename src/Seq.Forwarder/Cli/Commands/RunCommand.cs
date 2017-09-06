@@ -64,7 +64,7 @@ namespace Seq.Forwarder.Cli.Commands
             {
                 var logger = CreateLogger(
                     LogEventLevel.Information,
-                    InstallCommand.GetDefaultInternalLogPath());
+                    SeqForwarderDiagnosticConfig.GetDefaultInternalLogPath());
 
                 logger.Fatal(ex, "Failed to load configuration from {ConfigFilePath}", _storagePath.ConfigFilePath);
                 (logger as IDisposable)?.Dispose();
@@ -96,7 +96,7 @@ namespace Seq.Forwarder.Cli.Commands
                     fileSizeLimitBytes: 1024 * 1024);
 
             if (Environment.UserInteractive)
-                loggerConfiguration.WriteTo.LiterateConsole(restrictedToMinimumLevel: LogEventLevel.Information);
+                loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
             return loggerConfiguration.CreateLogger();
         }
@@ -172,7 +172,7 @@ namespace Seq.Forwarder.Cli.Commands
             Console.WriteLine();
             Write(" Seq Forwarder", ConsoleColor.White);
             Write(" ──", ConsoleColor.DarkGray);
-            Write(" © 2016 Datalust Pty Ltd", ConsoleColor.Gray);
+            Write(" © 2017 Datalust Pty Ltd", ConsoleColor.Gray);
             Console.WriteLine();
             Write("─", ConsoleColor.DarkGray, 47);
             Console.WriteLine();

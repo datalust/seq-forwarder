@@ -1,4 +1,5 @@
-﻿using Seq.Forwarder.Shipper;
+﻿using Seq.Forwarder.Multiplexing;
+using Seq.Forwarder.Shipper;
 using Seq.Forwarder.Tests.Support;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace Seq.Forwarder.Tests.Shipper
         public void WhenApiKeysDontMatchEmptyResponseReturned()
         {
             var proxy = new ServerResponseProxy();
-            proxy.ResponseReturned(Some.ApiKey(), "this is never used");
+            proxy.SuccessResponseReturned(Some.ApiKey(), "this is never used");
             var response = proxy.GetResponseText(Some.ApiKey());
             Assert.Equal("{}", response);
         }
@@ -29,7 +30,7 @@ namespace Seq.Forwarder.Tests.Shipper
             var proxy = new ServerResponseProxy();
             var apiKey = Some.ApiKey();
             var responseText = "some response";
-            proxy.ResponseReturned(apiKey, responseText);
+            proxy.SuccessResponseReturned(apiKey, responseText);
             var response = proxy.GetResponseText(apiKey);
             Assert.Equal(responseText, response);
         }
@@ -39,7 +40,7 @@ namespace Seq.Forwarder.Tests.Shipper
         {
             var proxy = new ServerResponseProxy();
             var responseText = "some response";
-            proxy.ResponseReturned(null, responseText);
+            proxy.SuccessResponseReturned(null, responseText);
             var response = proxy.GetResponseText(null);
             Assert.Equal(responseText, response);
         }

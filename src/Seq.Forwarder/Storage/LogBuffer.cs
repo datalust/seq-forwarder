@@ -254,22 +254,6 @@ namespace Seq.Forwarder.Storage
             return k;
         }
 
-        public void Truncate()
-        {
-            lock (_sync)
-            {
-                RequireNotDisposed();
-
-                using (var tx = _env.BeginTransaction())
-                using (var db = tx.OpenDatabase())
-                {
-                    db.Drop(tx);
-                    tx.Commit();
-                    _entries = 0;
-                }
-            }
-        }
-
         public void Enumerate(Action<ulong, byte[]> action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));

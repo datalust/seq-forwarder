@@ -268,38 +268,10 @@ namespace Seq.Forwarder.Cli.Commands
             if (!Directory.Exists(storagePath.StorageRootPath))
                 Directory.CreateDirectory(storagePath.StorageRootPath);
 
-            var config = new SeqForwarderConfig
-            {
-                Output =
-                {
-                    ServerUrl = "http://localhost:5341",
-                    ApiKey = null,
-                    EventBodyLimitBytes = 256 * 1024,
-                    RawPayloadLimitBytes = 10 * 1024 * 1024
-                },
-                Diagnostics =
-                {
-                    InternalLoggingLevel = LogEventLevel.Information,
-                    InternalLogPath = GetDefaultInternalLogPath()
-                },
-                Storage =
-                {
-                    BufferSizeBytes = 64*1024*1024
-                },
-                Api =
-                {
-                    ListenUri = "http://localhost:15341"
-                }
-            };
-
+            var config = new SeqForwarderConfig();
             SeqForwarderConfig.Write(storagePath.ConfigFilePath, config);
 
             return config;
-        }
-
-        public static string GetDefaultInternalLogPath()
-        {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Seq\Logs\");
         }
     }
 }

@@ -15,8 +15,7 @@
 using System;
 using System.IO;
 using Seq.Forwarder.Cli.Features;
-using Seq.Forwarder.Config;
-using Seq.Forwarder.Storage;
+using Seq.Forwarder.Multiplexing;
 using Serilog;
 
 namespace Seq.Forwarder.Cli.Commands
@@ -35,16 +34,12 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                using (var buffer = new LogBuffer(_storagePath.BufferPath, config.Storage.BufferSizeBytes))
-                {
-                    buffer.Truncate();
-                }
+                ActiveLogBufferMap.Truncate(_storagePath.BufferPath);
                 return 0;
             }
             catch (Exception ex)
             {
-                var logger = new LoggerConfiguration().WriteTo.LiterateConsole().CreateLogger();
+                var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
                 logger.Fatal(ex, "Could not truncate log buffer");
                 return 1;

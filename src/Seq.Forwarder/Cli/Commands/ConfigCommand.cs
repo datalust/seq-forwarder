@@ -72,7 +72,7 @@ namespace Seq.Forwarder.Cli.Commands
             }
             catch (Exception ex)
             {
-                var logger = new LoggerConfiguration().WriteTo.LiterateConsole().CreateLogger();
+                var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
                 logger.Fatal(ex, "Could not update config");
                 return 1;

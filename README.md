@@ -9,7 +9,7 @@ API and persists these to its own internal storage until the remote Seq server c
 
 ![Seq Forwarder](https://raw.githubusercontent.com/nblumhardt/images/master/seq-forwarder-schematic.png)
 
-Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
+Seq Forwarder listens on port `15341` by default. The HTTP ingestion API is identical to
 the Seq one, so standard client libraries like _Serilog.Sinks.Seq_ can write to
 it directly.
 
