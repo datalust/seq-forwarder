@@ -8,6 +8,15 @@ function Restore-Packages
 	& nuget restore
 }
 
+function Update-AssemblyInfo($version)
+{  
+    $versionPattern = "[0-9]+(\.([0-9]+|\*)){3}"
+
+    (cat ./src/Seq.Forwarder.Administration/Properties/AssemblyInfo.cs) | foreach {  
+            % {$_ -replace $versionPattern, "$version.0" }             
+        } | sc -Encoding "UTF8" $file                                 
+}
+
 function Update-WixVersion($version)
 {
     $defPattern = "define Version = ""0\.0\.0"""
@@ -62,6 +71,7 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 Clean-Output
 Restore-Packages
 Update-WixVersion $version
+Update-AssemblyInfo $version
 Execute-MSBuild $version $suffix
 Execute-Tests
 Publish-Artifacts $version $suffix
