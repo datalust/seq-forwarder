@@ -9,7 +9,7 @@ API and persists these to its own internal storage until the remote Seq server c
 
 ![Seq Forwarder](https://raw.githubusercontent.com/nblumhardt/images/master/seq-forwarder-schematic.png)
 
-Seq Forwarder listens on port `15341`. The HTTP ingestion API is identical to
+Seq Forwarder listens on port `15341` by default. The HTTP ingestion API is identical to
 the Seq one, so standard client libraries like _Serilog.Sinks.Seq_ can write to
 it directly.
 
@@ -36,10 +36,7 @@ can be specified on the command-line, like `User=` and `Email=` above, to tag th
 
 ### Building
 
-Visual Studio 2015 is required. While migrating from our internal CI no scripted build is set up yet - just build
-the solution in Release mode and grab the resulting binaries.
-
-The solution is currently a Windows-only .NET 4.5.2 application. .NET Core support is intended sometime after its RTM.
+Visual Studio 2017 is required. The solution is currently a Windows-only .NET 4.5.2 application. .NET Core support is intended sometime after its RTM.
 
 You will need [Wix 3.10](http://wixtoolset.org) to build the setup/MSI.
 

@@ -33,6 +33,7 @@ namespace Seq.Forwarder.Cli.Commands
     {
         readonly StoragePathFeature _storagePath;
         readonly ServiceCredentialsFeature _serviceCredentials;
+        readonly ListenUriFeature _listenUri;
 
         bool _setup;
 
@@ -40,6 +41,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             _storagePath = Enable<StoragePathFeature>();
             _serviceCredentials = Enable<ServiceCredentialsFeature>();
+            _listenUri = Enable<ListenUriFeature>();
 
             Options.Add(
                 "setup",
@@ -183,6 +185,12 @@ namespace Seq.Forwarder.Cli.Commands
                 config = CreateDefaultConfig(_storagePath);
             }
 
+            if (!string.IsNullOrEmpty(_listenUri.ListenUri))
+            {
+                config.Api.ListenUri = _listenUri.ListenUri;
+                SeqForwarderConfig.Write(_storagePath.ConfigFilePath, config);
+            }
+
             var args = new List<string>
             {
                 "/LogFile=\"\"",
@@ -206,7 +214,7 @@ namespace Seq.Forwarder.Cli.Commands
                 cout.WriteLine($"Granting {_serviceCredentials.Username} rights to {config.Diagnostics.InternalLogPath}...");
                 GiveFullControl(config.Diagnostics.InternalLogPath, _serviceCredentials.Username);
 
-                var listenUri = MakeListenUriReservationPattern();
+                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
                 cout.WriteLine($"Adding URL reservation at {listenUri} for {_serviceCredentials.Username} (may request UAC elevation)...");
                 NetSh.AddUrlAcl(listenUri, _serviceCredentials.Username);
 
@@ -221,7 +229,7 @@ namespace Seq.Forwarder.Cli.Commands
                 cout.WriteLine($"Granting NT AUTHORITY\\LocalService account rights to {config.Diagnostics.InternalLogPath}...");
                 GiveFullControl(config.Diagnostics.InternalLogPath, "NT AUTHORITY\\LocalService");
 
-                var listenUri = MakeListenUriReservationPattern();
+                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
                 cout.WriteLine($"Adding URL reservation at {listenUri} for the Local Service account (may request UAC elevation)...");
                 NetSh.AddUrlAcl(listenUri, "NT AUTHORITY\\LocalService");
             }
@@ -233,9 +241,9 @@ namespace Seq.Forwarder.Cli.Commands
             Console.ResetColor();
         }
 
-        static string MakeListenUriReservationPattern()
+        static string MakeListenUriReservationPattern(string uri)
         {
-            var listenUri = ServerService.ListenUri.Replace("localhost", "+");
+            var listenUri = uri.Replace("localhost", "+");
             if (!listenUri.EndsWith("/"))
                 listenUri += "/";
             return listenUri;
@@ -260,34 +268,10 @@ namespace Seq.Forwarder.Cli.Commands
             if (!Directory.Exists(storagePath.StorageRootPath))
                 Directory.CreateDirectory(storagePath.StorageRootPath);
 
-            var config = new SeqForwarderConfig
-            {
-                Output =
-                {
-                    ServerUrl = "http://localhost:5341",
-                    ApiKey = null,
-                    EventBodyLimitBytes = 256 * 1024,
-                    RawPayloadLimitBytes = 10 * 1024 * 1024
-                },
-                Diagnostics =
-                {
-                    InternalLoggingLevel = LogEventLevel.Information,
-                    InternalLogPath = GetDefaultInternalLogPath()
-                },
-                Storage =
-                {
-                    BufferSizeBytes = 64*1024*1024
-                }
-            };
-
+            var config = new SeqForwarderConfig();
             SeqForwarderConfig.Write(storagePath.ConfigFilePath, config);
 
             return config;
-        }
-
-        public static string GetDefaultInternalLogPath()
-        {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Seq\Logs\");
         }
     }
 }

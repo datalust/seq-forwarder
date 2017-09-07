@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright 2016-2017 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 
 namespace Seq.Forwarder.Config
 {
-    class SeqForwarderStorageConfig
+    class SeqForwarderApiConfig
     {
-        public ulong BufferSizeBytes { get; set; } = 64 * 1024 * 1024;
+        public string ListenUri { get; set; } = "http://localhost:15341";
     }
 }

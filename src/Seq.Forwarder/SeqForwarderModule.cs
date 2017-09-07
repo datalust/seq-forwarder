@@ -16,9 +16,8 @@ using System;
 using Autofac;
 using Nancy;
 using Seq.Forwarder.Config;
+using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.ServiceProcess;
-using Seq.Forwarder.Shipper;
-using Seq.Forwarder.Storage;
 using Seq.Forwarder.Web.Formats;
 using Seq.Forwarder.Web.Host;
 
@@ -27,14 +26,14 @@ namespace Seq.Forwarder
     class SeqForwarderModule : Module
     {
         readonly string _bufferPath;
+        readonly string _listenUri;
         readonly SeqForwarderConfig _config;
 
-        public SeqForwarderModule(string bufferPath, SeqForwarderConfig config)
+        public SeqForwarderModule(string bufferPath, string listenUri, SeqForwarderConfig config)
         {
-            if (bufferPath == null) throw new ArgumentNullException(nameof(bufferPath));
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            _bufferPath = bufferPath;
-            _config = config;
+            _bufferPath = bufferPath ?? throw new ArgumentNullException(nameof(bufferPath));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _listenUri = listenUri ?? throw new ArgumentNullException(nameof(listenUri));
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -47,10 +46,15 @@ namespace Seq.Forwarder
                 .AsSelf()
                 .PropertiesAutowired();
 
-            builder.RegisterType<ServerService>().SingleInstance();
+            builder.Register(c => new ServerService(c.Resolve<NancyBootstrapper>(), c.Resolve<Lazy<ActiveLogBufferMap>>(), _listenUri)).SingleInstance();
             builder.RegisterType<NancyBootstrapper>();
-            builder.Register(c => new LogBuffer(_bufferPath, _config.Storage.BufferSizeBytes)).SingleInstance();
-            builder.RegisterType<HttpLogShipper>().SingleInstance();
+
+            builder.RegisterType<ActiveLogBufferMap>()
+                .WithParameter("bufferPath", _bufferPath)
+                .SingleInstance();
+
+            builder.RegisterType<HttpLogShipperFactory>().As<ILogShipperFactory>();
+            builder.RegisterInstance(_config.Storage);
             builder.RegisterInstance(_config.Output);
             builder.RegisterType<ServerResponseProxy>().SingleInstance();
         }

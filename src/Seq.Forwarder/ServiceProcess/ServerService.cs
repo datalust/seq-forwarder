@@ -14,7 +14,7 @@
 
 using System;
 using Nancy.Hosting.Self;
-using Seq.Forwarder.Shipper;
+using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.Web.Host;
 using Serilog;
 
@@ -22,18 +22,19 @@ namespace Seq.Forwarder.ServiceProcess
 {
     class ServerService
     {
-        readonly Lazy<HttpLogShipper> _shipper;
+        readonly Lazy<ActiveLogBufferMap> _logBufferMap;
         readonly NancyHost _nancyHost;
-        public const string ListenUri = "http://localhost:15341";
+        string _listenUri;
 
-        public ServerService(NancyBootstrapper bootstrapper, Lazy<HttpLogShipper> shipper)
+        public ServerService(NancyBootstrapper bootstrapper, Lazy<ActiveLogBufferMap> logBufferMap, string listenUri)
         {
-            _shipper = shipper;
+            _logBufferMap = logBufferMap;
+            _listenUri = listenUri;
             var hc = new HostConfiguration
             {
                 UrlReservations = { CreateAutomatically = Environment.UserInteractive }
             };
-            _nancyHost = new NancyHost(bootstrapper, hc, new Uri(ListenUri));
+            _nancyHost = new NancyHost(bootstrapper, hc, new Uri(_listenUri));
         }
 
         public void Start()
@@ -44,9 +45,10 @@ namespace Seq.Forwarder.ServiceProcess
 
                 _nancyHost.Start();
 
-                Log.Information("Seq Forwarder listening on {ListenUri}", ListenUri);
+                Log.Information("Seq Forwarder listening on {ListenUri}", _listenUri);
 
-                _shipper.Value.Start();
+                _logBufferMap.Value.Load();
+                _logBufferMap.Value.Start();
             }
             catch (Exception ex)
             {
@@ -60,7 +62,7 @@ namespace Seq.Forwarder.ServiceProcess
             Log.Debug("Seq Forwarder stopping");
 
             _nancyHost.Stop();
-            _shipper.Value.Stop();
+            _logBufferMap.Value.Stop();
 
             Log.Information("Seq Forwarder stopped cleanly");
         }
