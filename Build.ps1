@@ -12,9 +12,11 @@ function Update-AssemblyInfo($version)
 {  
     $versionPattern = "[0-9]+(\.([0-9]+|\*)){3}"
 
-    (cat ./src/Seq.Forwarder.Administration/Properties/AssemblyInfo.cs) | foreach {  
+	$file = "./src/Seq.Forwarder.Administration/Properties/AssemblyInfo.cs"
+    (cat $file) | foreach {  
             % {$_ -replace $versionPattern, "$version.0" }             
         } | sc -Encoding "UTF8" $file                                 
+	if($LASTEXITCODE -ne 0) { exit 1 }
 }
 
 function Update-WixVersion($version)
@@ -26,6 +28,7 @@ function Update-WixVersion($version)
     (cat $product) | foreach {  
             % {$_ -replace $defPattern, $def }    
         } | sc -Encoding "UTF8" $product
+	if($LASTEXITCODE -ne 0) { exit 1 }
 }
 
 function Execute-MSBuild($version, $suffix)
