@@ -55,6 +55,8 @@ namespace Seq.Forwarder.Multiplexing
 
             lock (_sync)
             {
+                Directory.CreateDirectory(_bufferPath);
+
                 var defaultDataFilePath = Path.Combine(_bufferPath, DataFileName);
                 if (File.Exists(defaultDataFilePath))
                 {
