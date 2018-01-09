@@ -64,7 +64,7 @@ namespace Seq.Forwarder.Shipper
             if (!baseUri.EndsWith("/"))
                 baseUri += "/";
 
-            _httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
+            _httpClient = new HttpClient { BaseAddress = new Uri(baseUri), Timeout = TimeSpan.FromMilliseconds(_outputConfig.SocketLifetime - 1000) };
             _timer = new Timer(s => OnTick());
         }
 
@@ -103,7 +103,7 @@ namespace Seq.Forwarder.Shipper
             if (_timer.Dispose(wh))
                 wh.WaitOne();
         }
-        
+
         public override void Dispose()
         {
             Stop();
@@ -216,7 +216,7 @@ namespace Seq.Forwarder.Shipper
             var content = new StreamWriter(raw, Encoding.UTF8);
             content.Write("{\"Events\":[");
             content.Flush();
-            var contentRemainingBytes = (int) _outputConfig.RawPayloadLimitBytes - 13; // Includes closing delims
+            var contentRemainingBytes = (int)_outputConfig.RawPayloadLimitBytes - 13; // Includes closing delims
 
             var delimStart = "";
             foreach (var logBufferEntry in entries)

@@ -21,6 +21,7 @@ using Serilog.Events;
 using Serilog.Formatting.Compact;
 using System;
 using System.IO;
+using System.Net;
 using System.ServiceProcess;
 
 namespace Seq.Forwarder.Cli.Commands
@@ -73,8 +74,12 @@ namespace Seq.Forwarder.Cli.Commands
 
             Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
 
+            Uri listenUri = new Uri(_listenUri.ListenUri ?? config.Api.ListenUri);
+            ServicePoint servicePoint = ServicePointManager.FindServicePoint(listenUri);
+            servicePoint.ConnectionLeaseTimeout = config.Output.SocketLifetime;
+
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri ?? config.Api.ListenUri, config));
+            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, listenUri.AbsoluteUri, config));
 
             var container = builder.Build();
             var exit = Environment.UserInteractive

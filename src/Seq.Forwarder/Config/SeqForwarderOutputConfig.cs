@@ -22,9 +22,10 @@ namespace Seq.Forwarder.Config
         const string ProtectedDataPrefix = "pd.";
 
         public string ServerUrl { get; set; } = "http://localhost:5341";
+        public int SocketLifetime { get; set; } = 60000 * 3; //this is what we use for lifetime, 1-5 minutes is pretty much the range so if there is a sweet spot for how the log shipper runs, I can adjust the default
         public ulong EventBodyLimitBytes { get; set; } = 256 * 1024;
         public ulong RawPayloadLimitBytes { get; set; } = 10 * 1024 * 1024;
-
+        
         [JsonProperty("apiKey")]
         public string EncodedApiKey { get; set; }
 
