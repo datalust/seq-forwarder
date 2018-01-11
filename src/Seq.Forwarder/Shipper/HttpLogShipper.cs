@@ -48,23 +48,14 @@ namespace Seq.Forwarder.Shipper
 
         static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2), MaximumConnectionInterval = TimeSpan.FromMinutes(2);
 
-        public HttpLogShipper(LogBuffer logBuffer, string apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy)
+        public HttpLogShipper(LogBuffer logBuffer, string apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy, HttpClient outputHttpClient)
         {
             _apiKey = apiKey;
+            _httpClient = outputHttpClient ?? throw new ArgumentNullException(nameof(outputHttpClient));
             _logBuffer = logBuffer ?? throw new ArgumentNullException(nameof(logBuffer));
             _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
             _serverResponseProxy = serverResponseProxy ?? throw new ArgumentNullException(nameof(serverResponseProxy));
-
-            if (string.IsNullOrWhiteSpace(outputConfig.ServerUrl))
-                throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
-
             _connectionSchedule = new ExponentialBackoffConnectionSchedule(QuietWaitPeriod);
-
-            var baseUri = outputConfig.ServerUrl;
-            if (!baseUri.EndsWith("/"))
-                baseUri += "/";
-
-            _httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
             _timer = new Timer(s => OnTick());
         }
 
