@@ -53,6 +53,13 @@ The outputs from _Seq.Forwarder_ and _Seq.Forwarder.Administration_ (if required
 
 Run `Seq.Forwarder.Administration.exe` to install the forwarder, or check out the command-line for scripted setup.
 
+
+### Troubleshooting
+
+By default the "forwarder" logs will be stored under `%PROGRAMDATA%\Seq\Logs`.  If the destination is not available, an exception will be stored in these log files.
+
+If you need to inspect the current configuration, it can be found at: `%PROGRAMDATA%\Seq\Forwarder\SeqForwarder.json`
+
 ### Command-line usage
 
 **List available commands:**
