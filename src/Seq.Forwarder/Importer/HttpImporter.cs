@@ -36,13 +36,12 @@ namespace Seq.Forwarder.Importer
 
         public HttpImporter(BufferedLogReader logReader, SeqImportConfig importConfig)
         {
-            if (logReader == null) throw new ArgumentNullException(nameof(logReader));
             if (importConfig == null) throw new ArgumentNullException(nameof(importConfig));
 
             if (string.IsNullOrWhiteSpace(importConfig.ServerUrl))
                 throw new ArgumentException("The destination Seq server URL must be provided.");
 
-            _logReader = logReader;
+            _logReader = logReader ?? throw new ArgumentNullException(nameof(logReader));
             _importConfig = importConfig;
 
             var baseUri = importConfig.ServerUrl;

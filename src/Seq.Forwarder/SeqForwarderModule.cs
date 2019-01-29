@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright 2016-2018 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using Autofac;
 using Nancy;
 using Seq.Forwarder.Config;
@@ -57,6 +58,18 @@ namespace Seq.Forwarder
             builder.RegisterInstance(_config.Storage);
             builder.RegisterInstance(_config.Output);
             builder.RegisterType<ServerResponseProxy>().SingleInstance();
+
+            builder.Register(c =>
+            {
+                var baseUri = c.Resolve<SeqForwarderOutputConfig>().ServerUrl;
+                if (string.IsNullOrWhiteSpace(baseUri))
+                    throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
+
+                if (!baseUri.EndsWith("/"))
+                    baseUri += "/";
+
+                return new HttpClient { BaseAddress = new Uri(baseUri) };
+            }).SingleInstance();
         }
     }
 }
