@@ -58,7 +58,7 @@ namespace Seq.Forwarder.Multiplexing
 
             lock (_sync)
             {
-                if (_loaded) throw new InvalidOperationException("The log buffere map is already loaded.");
+                if (_loaded) throw new InvalidOperationException("The log buffer map is already loaded.");
 
                 Directory.CreateDirectory(_bufferPath);
 
