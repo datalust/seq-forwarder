@@ -15,9 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Nancy;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Seq.Forwarder.Util;
+using Seq.Forwarder.Web;
 using Serilog;
 
 namespace Seq.Forwarder.Multiplexing
@@ -33,6 +35,7 @@ namespace Seq.Forwarder.Multiplexing
         readonly ILogger _log = Log.ForContext<ActiveLogBufferMap>();
 
         readonly object _sync = new object();
+        bool _loaded;
         ActiveLogBuffer _noApiKeyLogBuffer;
         readonly Dictionary<string, ActiveLogBuffer> _buffersByApiKey = new Dictionary<string, ActiveLogBuffer>();
 
@@ -55,6 +58,8 @@ namespace Seq.Forwarder.Multiplexing
 
             lock (_sync)
             {
+                if (_loaded) throw new InvalidOperationException("The log buffere map is already loaded.");
+
                 Directory.CreateDirectory(_bufferPath);
 
                 var defaultDataFilePath = Path.Combine(_bufferPath, DataFileName);
@@ -102,6 +107,8 @@ namespace Seq.Forwarder.Multiplexing
                         _buffersByApiKey.Add(apiKey, activeBuffer);
                     }
                 }
+
+                _loaded = true;
             }
         }
 
@@ -109,6 +116,8 @@ namespace Seq.Forwarder.Multiplexing
         {
             lock (_sync)
             {
+                if (!_loaded) throw new InvalidOperationException("The log buffer map is not loaded.");
+
                 foreach (var buffer in OpenBuffers)
                 {
                     buffer.Shipper.Start();
@@ -120,6 +129,9 @@ namespace Seq.Forwarder.Multiplexing
         {
             lock (_sync)
             {
+                // Hard to ensure _loaded is set in all cases, better here to be forgiving and
+                // permit a clean shut-down.
+
                 foreach (var buffer in OpenBuffers)
                 {
                     buffer.Shipper.Stop();
@@ -131,6 +143,8 @@ namespace Seq.Forwarder.Multiplexing
         {
             lock (_sync)
             {
+                if (!_loaded) throw new BadRequestException("The forwarder service is starting up.", HttpStatusCode.ServiceUnavailable);
+
                 if (apiKey == null)
                 {
                     if (_noApiKeyLogBuffer == null)

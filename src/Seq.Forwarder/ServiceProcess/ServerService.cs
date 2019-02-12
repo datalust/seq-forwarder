@@ -24,7 +24,7 @@ namespace Seq.Forwarder.ServiceProcess
     {
         readonly Lazy<ActiveLogBufferMap> _logBufferMap;
         readonly NancyHost _nancyHost;
-        string _listenUri;
+        readonly string _listenUri;
 
         public ServerService(NancyBootstrapper bootstrapper, Lazy<ActiveLogBufferMap> logBufferMap, string listenUri)
         {
