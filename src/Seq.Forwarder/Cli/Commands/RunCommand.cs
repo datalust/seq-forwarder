@@ -172,7 +172,7 @@ namespace Seq.Forwarder.Cli.Commands
             Console.WriteLine();
             Write(" Seq Forwarder", ConsoleColor.White);
             Write(" ──", ConsoleColor.DarkGray);
-            Write(" © 2017 Datalust Pty Ltd", ConsoleColor.Gray);
+            Write(" © 2019 Datalust Pty Ltd", ConsoleColor.Gray);
             Console.WriteLine();
             Write("─", ConsoleColor.DarkGray, 47);
             Console.WriteLine();
