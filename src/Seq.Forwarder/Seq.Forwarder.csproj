@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net4.5.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon>SeqForwarder.ico</ApplicationIcon>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -24,43 +24,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Attribution\Nancy Libraries License.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Security" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="autofac" Version="4.6.2" />
+    <PackageReference Include="autofac" Version="5.2.0" />
+    <PackageReference Include="autofac.extensions.dependencyinjection" Version="6.0.0" />
     <PackageReference Include="lightningdb" Version="0.10.0" />
-    <PackageReference Include="nancy" Version="1.4.4" />
-    <PackageReference Include="nancy.bootstrappers.autofac" Version="1.4.1" />
-    <PackageReference Include="nancy.hosting.self" Version="1.4.1" />
-    <PackageReference Include="newtonsoft.json" Version="10.0.3" />
-    <PackageReference Include="serilog" Version="2.6.0" />
-    <PackageReference Include="serilog.formatting.compact" Version="1.0.0" />
+    <PackageReference Include="newtonsoft.json" Version="12.0.3" />
+    <PackageReference Include="serilog" Version="2.9.0" />
+    <PackageReference Include="serilog.aspnetcore" Version="3.4.0" />
+    <PackageReference Include="serilog.formatting.compact" Version="1.1.0" />
     <PackageReference Include="serilog.sinks.console" Version="3.1.1" />
-    <PackageReference Include="serilog.sinks.rollingfile" Version="3.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Cli\Installers\ProjectInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="ServiceProcess\SeqForwarderWindowsService.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <PackageReference Include="serilog.sinks.file" Version="4.1.0" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
+    <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

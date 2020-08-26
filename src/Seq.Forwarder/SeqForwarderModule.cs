@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2018 Datalust Pty Ltd
+﻿// Copyright Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,11 +15,8 @@
 using System;
 using System.Net.Http;
 using Autofac;
-using Nancy;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Multiplexing;
-using Seq.Forwarder.ServiceProcess;
-using Seq.Forwarder.Web.Formats;
 using Seq.Forwarder.Web.Host;
 
 namespace Seq.Forwarder
@@ -27,29 +24,17 @@ namespace Seq.Forwarder
     class SeqForwarderModule : Module
     {
         readonly string _bufferPath;
-        readonly string _listenUri;
         readonly SeqForwarderConfig _config;
 
-        public SeqForwarderModule(string bufferPath, string listenUri, SeqForwarderConfig config)
+        public SeqForwarderModule(string bufferPath, SeqForwarderConfig config)
         {
             _bufferPath = bufferPath ?? throw new ArgumentNullException(nameof(bufferPath));
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _listenUri = listenUri ?? throw new ArgumentNullException(nameof(listenUri));
         }
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<JsonNetSerializer>().As<ISerializer>();
-
-            builder.RegisterAssemblyTypes(ThisAssembly)
-                .AssignableTo<INancyModule>()
-                .As<INancyModule>()
-                .AsSelf()
-                .PropertiesAutowired();
-
-            builder.Register(c => new ServerService(c.Resolve<NancyBootstrapper>(), c.Resolve<Lazy<ActiveLogBufferMap>>(), _listenUri)).SingleInstance();
-            builder.RegisterType<NancyBootstrapper>();
-
+            builder.RegisterType<ServerService>().SingleInstance();
             builder.RegisterType<ActiveLogBufferMap>()
                 .WithParameter("bufferPath", _bufferPath)
                 .SingleInstance();

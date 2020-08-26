@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Nancy;
+using System.Net;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Seq.Forwarder.Util;
@@ -24,7 +24,7 @@ using Serilog;
 
 namespace Seq.Forwarder.Multiplexing
 {
-    class ActiveLogBufferMap : IDisposable
+    public class ActiveLogBufferMap : IDisposable
     {
         const string DataFileName = "data.mdb", LockFileName = "lock.mdb", ApiKeyFileName = ".apikey";
 

@@ -17,7 +17,7 @@ using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Config
 {
-    class SeqForwarderOutputConfig
+    public class SeqForwarderOutputConfig
     {
         const string ProtectedDataPrefix = "pd.";
 

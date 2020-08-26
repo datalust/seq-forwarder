@@ -14,11 +14,9 @@ namespace Seq.Forwarder
                 .As<Command>()
                 .WithMetadataFrom<CommandAttribute>();
 
-            using (var container = builder.Build())
-            {
-                var clh = container.Resolve<CommandLineHost>();
-                return clh.Run(args, Console.Out, Console.Error);
-            }
+            using var container = builder.Build();
+            var clh = container.Resolve<CommandLineHost>();
+            return clh.Run(args, Console.Out, Console.Error);
         }
     }
 }

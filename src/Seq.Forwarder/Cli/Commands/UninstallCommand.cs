@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Configuration.Install;
+using System; 
 using System.IO;
+using Seq.Forwarder.ServiceProcess;
+using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -26,12 +27,12 @@ namespace Seq.Forwarder.Cli.Commands
             try
             {
                 cout.WriteLine("Uninstalling service...");
-                ManagedInstallerClass.InstallHelper(new[]
-                {
-                    "/u",
-                    "/LogFile=\"\"",
-                    GetType().Assembly.Location
-                });
+
+                var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
+                var exitCode = CaptiveProcess.Run(sc, $"delete \"{SeqForwarderWindowsService.WindowsServiceName}\"", cout.WriteLine, cout.WriteLine);
+                if (exitCode != 0)
+                    throw new InvalidOperationException($"The `sc.exe delete` call failed with exit code {exitCode}.");
+
                 cout.WriteLine("Service uninstalled successfully.");
                 return 0;
             }

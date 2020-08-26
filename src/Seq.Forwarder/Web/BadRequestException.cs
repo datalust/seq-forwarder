@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Nancy;
+using System.Net;
 
 namespace Seq.Forwarder.Web
 {
@@ -25,6 +25,6 @@ namespace Seq.Forwarder.Web
             StatusCode = statusCode;
         }
 
-        public HttpStatusCode StatusCode { get; private set; }
+        public HttpStatusCode StatusCode { get; }
     }
 }

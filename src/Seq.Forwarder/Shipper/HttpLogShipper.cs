@@ -19,12 +19,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
-using Nancy.IO;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
 using System.Threading.Tasks;
 using Seq.Forwarder.Multiplexing;
+using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Shipper
 {
@@ -162,7 +162,7 @@ namespace Seq.Forwarder.Shipper
                         if (sendingSingles != 0)
                         {
                             payload.Position = 0;
-                            var payloadText = new StreamReader(payload, Encoding.UTF8).ReadToEnd();
+                            var payloadText = await new StreamReader(payload, Encoding.UTF8).ReadToEndAsync();
                             Log.Error("HTTP shipping failed with {StatusCode}: {Result}; payload was {InvalidPayload}", result.StatusCode, await result.Content.ReadAsStringAsync(), payloadText);
                             _logBuffer.Dequeue(lastIncluded);
                             sendingSingles = 0;

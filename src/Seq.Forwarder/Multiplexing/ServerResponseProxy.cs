@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace Seq.Forwarder.Multiplexing
 {
-    class ServerResponseProxy
+    public class ServerResponseProxy
     {
         const string EmptyResponse = "{}";
 

@@ -22,11 +22,13 @@ namespace Seq.Forwarder.Cli.Commands
     [Command("restart", "Restart the Windows service")]
     class RestartCommand : Command
     {
+
         protected override int Run(TextWriter cout)
         {
             try
             {
                 var controller = new ServiceController(SeqForwarderWindowsService.WindowsServiceName);
+
                 if (controller.Status != ServiceControllerStatus.Stopped)
                 {
                     cout.WriteLine("Stopping {0}...", controller.ServiceName);

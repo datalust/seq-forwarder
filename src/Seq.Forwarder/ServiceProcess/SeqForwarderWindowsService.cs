@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright 2020 Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Net;
 using System.ServiceProcess;
+using Seq.Forwarder.Web.Host;
 
 namespace Seq.Forwarder.ServiceProcess
 {
     class SeqForwarderWindowsService : ServiceBase
     {
         readonly ServerService _serverService;
-        readonly IDisposable _disposeOnStop;
 
         public static string WindowsServiceName { get; } = "Seq Forwarder";
 
-        public SeqForwarderWindowsService(ServerService serverService, IDisposable disposeOnStop)
+        public SeqForwarderWindowsService(ServerService serverService)
         {
             // Enable TLS 1.2 Support.
             // .NET Framework 4.5.2 does not have it enabled by default
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             _serverService = serverService;
-            _disposeOnStop = disposeOnStop;
 
             ServiceName = WindowsServiceName;
         }
@@ -45,7 +43,6 @@ namespace Seq.Forwarder.ServiceProcess
         protected override void OnStop()
         {
             _serverService.Stop();
-            _disposeOnStop.Dispose();
         }
     }
 }

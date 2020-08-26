@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
-using Nancy;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Seq.Forwarder.Config;
@@ -26,28 +27,36 @@ using Serilog;
 
 namespace Seq.Forwarder.Web.Api
 {
-    class RawEventsModule : NancyModule
+    public class RawEventsController : Controller
     {
+        static readonly Encoding Encoding = new UTF8Encoding(false);
+        
         static ILogger IngestionLog => Diagnostics.IngestionLog.Log;
 
-        readonly Lazy<ActiveLogBufferMap> _logBufferMap;
-        readonly Lazy<SeqForwarderOutputConfig> _outputConfig;
-        readonly Lazy<ServerResponseProxy> _serverResponseProxy;
+        readonly ActiveLogBufferMap _logBufferMap;
+        readonly SeqForwarderOutputConfig _outputConfig;
+        readonly ServerResponseProxy _serverResponseProxy;
 
         readonly JsonSerializer _rawSerializer = JsonSerializer.Create(
             new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
 
-        public RawEventsModule(Lazy<ActiveLogBufferMap> logBufferMap, Lazy<SeqForwarderOutputConfig> outputConfig, Lazy<ServerResponseProxy> serverResponseProxy)
+        public RawEventsController(ActiveLogBufferMap logBufferMap, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy)
         {
             _logBufferMap = logBufferMap;
             _outputConfig = outputConfig;
             _serverResponseProxy = serverResponseProxy;
-
-            Get["/api/events/describe"] = _ => Response.AsText("{\"Links\":{\"Raw\":\"/api/events/raw\"}}", "application/json");
-            Post["/api/events/raw"] = _ => Ingest();
         }
 
-        Response Ingest()
+        IPAddress ClientHostIP => Request.HttpContext.Connection.RemoteIpAddress;
+
+        [HttpGet, Route("api/events/describe")]
+        public IActionResult Resources()
+        {
+            return Content("{\"Links\":{\"Raw\":\"/api/events/raw\"}}", "application/json", Encoding);
+        }   
+        
+        [HttpPost, Route("api/events/raw")]
+        public IActionResult Ingest()
         {
             JObject posted;
             try
@@ -56,29 +65,23 @@ namespace Seq.Forwarder.Web.Api
             }
             catch (Exception ex)
             {
-                IngestionLog.Debug(ex, "Rejecting payload from {ClientHostIP} due to invalid JSON, request body could not be parsed", Request.UserHostAddress);
-                return Response
-                    .AsText("Invalid raw event JSON, body could not be parsed.")
-                    .WithStatusCode(HttpStatusCode.BadRequest);
+                IngestionLog.Debug(ex, "Rejecting payload from {ClientHostIP} due to invalid JSON, request body could not be parsed", ClientHostIP);
+                return BadRequest("Invalid raw event JSON, body could not be parsed.");
             }
 
             if (posted == null ||
                 !(posted.TryGetValue("events", StringComparison.Ordinal, out JToken eventsToken) ||
                   posted.TryGetValue("Events", StringComparison.Ordinal, out eventsToken)))
             {
-                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid JSON structure", Request.UserHostAddress);
-                return Response
-                    .AsText("Invalid raw event JSON, body must contain an 'Events' array.")
-                    .WithStatusCode(HttpStatusCode.BadRequest);
+                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid JSON structure", ClientHostIP);
+                return BadRequest("Invalid raw event JSON, body must contain an 'Events' array.");
             }
 
             var events = eventsToken as JArray;
             if (events == null)
             {
-                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid Events property structure", Request.UserHostAddress);
-                return Response
-                    .AsText("Invalid raw event JSON, the 'Events' property must be an array.")
-                    .WithStatusCode(HttpStatusCode.BadRequest);
+                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid Events property structure", ClientHostIP);
+                return BadRequest("Invalid raw event JSON, the 'Events' property must be an array.");
             }
             
             var encoded = new byte[events.Count][];
@@ -88,11 +91,11 @@ namespace Seq.Forwarder.Web.Api
                 var s = e.ToString(Formatting.None);
                 var payload = Encoding.UTF8.GetBytes(s);
 
-                if (payload.Length > (int)_outputConfig.Value.EventBodyLimitBytes)
+                if (payload.Length > (int)_outputConfig.EventBodyLimitBytes)
                 {
-                    var startToLog = (int)Math.Min(_outputConfig.Value.EventBodyLimitBytes / 2, 1024);
+                    var startToLog = (int)Math.Min(_outputConfig.EventBodyLimitBytes / 2, 1024);
                     var prefix = s.Substring(0, startToLog);
-                    IngestionLog.Debug("Invalid payload from {ClientHostIP} due to oversized event; first {StartToLog} chars: {DocumentStart:l}", Request.UserHostAddress, startToLog, prefix);
+                    IngestionLog.Debug("Invalid payload from {ClientHostIP} due to oversized event; first {StartToLog} chars: {DocumentStart:l}", ClientHostIP, startToLog, prefix);
 
                     var jo = e as JObject;
                     // ReSharper disable SuspiciousTypeConversion.Global
@@ -116,7 +119,7 @@ namespace Seq.Forwarder.Web.Api
                         {
                             Partial = compactPrefix,
                             Environment.MachineName,
-                            _outputConfig.Value.EventBodyLimitBytes
+                            _outputConfig.EventBodyLimitBytes
                         }
                     }));
                 }
@@ -128,10 +131,10 @@ namespace Seq.Forwarder.Web.Api
             }
 
             var apiKey = GetRequestApiKeyToken();
-            _logBufferMap.Value.GetLogBuffer(apiKey).Enqueue(encoded);
+            _logBufferMap.GetLogBuffer(apiKey).Enqueue(encoded);
             
-            var response = Response.AsText(_serverResponseProxy.Value.GetResponseText(apiKey), "application/json");
-            response.StatusCode = HttpStatusCode.Created;
+            var response = Content(_serverResponseProxy.GetResponseText(apiKey), "application/json", Encoding);
+            response.StatusCode = (int)HttpStatusCode.Created;
             return response;
         }
 
@@ -140,7 +143,7 @@ namespace Seq.Forwarder.Web.Api
             var apiKeyToken = Request.Headers[SeqApi.ApiKeyHeaderName].FirstOrDefault();
 
             if (string.IsNullOrWhiteSpace(apiKeyToken))
-                apiKeyToken = (string)Request.Query.apiKey;
+                apiKeyToken = Request.Query["apiKey"];
 
             var normalized = apiKeyToken?.Trim();
             if (string.IsNullOrEmpty(normalized))
