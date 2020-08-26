@@ -4,30 +4,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <ApplicationIcon>SeqForwarder.ico</ApplicationIcon>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Authors>Datalust Pty Ltd, Contributors</Authors>
     <Company>Datalust Pty Ltd</Company>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyTitle>Seq.Forwarder</AssemblyTitle>
+    <AssemblyTitle>Seq Forwarder</AssemblyTitle>
     <Description>Seq HTTP Log Forwarder</Description>
-    <Copyright>Copyright © Datalust Pty Ltd and Contributors 2017</Copyright>
+    <Copyright>Copyright © Datalust Pty Ltd and Contributors</Copyright>
     <AssemblyName>seq-forwarder</AssemblyName>
-    <Platforms>x64</Platforms>
-    <GenerateAssemblyVersionAttribute>True</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>True</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="favicon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="autofac" Version="5.2.0" />
@@ -42,7 +28,6 @@
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 
 </Project>
