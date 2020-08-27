@@ -5,9 +5,6 @@ image: Visual Studio 2019
 artifacts:
   - path: artifacts/seqfwd-*.zip
   - path: artifacts/seqfwd-*.tar.gz
-    
-install:
-  - ps: ./Setup.ps1
 
 build_script:
   - ps: ./Build.ps1 -shortver "$($env:APPVEYOR_BUILD_VERSION)"
