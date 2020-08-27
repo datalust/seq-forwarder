@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if WINDOWS
+
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
-using Serilog;
 
 namespace Seq.Forwarder.Util
 {
     public static class ServiceConfiguration
     {
-        public static bool GetServiceBinaryPath(ServiceController controller, TextWriter cout, out string path)
+        public static bool GetServiceBinaryPath(ServiceController controller, TextWriter cout, [MaybeNullWhen(false)] out string path)
         {
             var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
 
@@ -53,7 +55,7 @@ namespace Seq.Forwarder.Util
             return true;
         }
 
-        static bool GetServiceCommandLine(string serviceName, TextWriter cout, out string path)
+        static bool GetServiceCommandLine(string serviceName, TextWriter cout, [MaybeNullWhen(false)] out string path)
         {
             if (serviceName == null) throw new ArgumentNullException(nameof(serviceName));
             if (cout == null) throw new ArgumentNullException(nameof(cout));
@@ -86,13 +88,11 @@ namespace Seq.Forwarder.Util
             return true;
         }
 
-        public static bool GetServiceStoragePath(string serviceName, StringWriter cout, out string storage)
+        public static bool GetServiceStoragePath(string serviceName, out string? storage)
         {
             if (serviceName == null) throw new ArgumentNullException(nameof(serviceName));
-            if (cout == null) throw new ArgumentNullException(nameof(cout));
 
-            string binpath;
-            if (GetServiceCommandLine(serviceName, new StringWriter(), out binpath) &&
+            if (GetServiceCommandLine(serviceName, new StringWriter(), out var binpath) &&
                 binpath.Contains("--storage=\""))
             {
                 var start = binpath.IndexOf("--storage=\"", StringComparison.Ordinal) + 11;
@@ -106,3 +106,6 @@ namespace Seq.Forwarder.Util
         }
     }
 }
+
+#endif
+

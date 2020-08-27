@@ -13,6 +13,23 @@
     <Description>Seq HTTP Log Forwarder</Description>
     <Copyright>Copyright © Datalust Pty Ltd and Contributors</Copyright>
     <AssemblyName>seq-forwarder</AssemblyName>
+    <RuntimeIdentifiers>win81-x64;ubuntu.18.04-x64;osx-x64</RuntimeIdentifiers>
+    <Nullable>Enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'win81-x64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`WINDOWS`))' == 'true')">
+    <IsWindows>true</IsWindows>
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'ubuntu.18.04-x64' Or '$(SeqForwarderRid)' == 'linux-x64' Or ('$(SeqRid)' == '' And '$([MSBuild]::IsOsPlatform(`LINUX`))' == 'true')">
+    <IsLinux>true</IsLinux>
+    <IsUnix>true</IsUnix>
+    <DefineConstants>$(DefineConstants);LINUX;UNIX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'osx-x64'  Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`OSX`))' == 'true')">
+    <IsMacOS>true</IsMacOS>
+    <IsUnix>true</IsUnix>
+    <DefineConstants>$(DefineConstants);MACOS;UNIX</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +43,9 @@
     <PackageReference Include="serilog.sinks.console" Version="3.1.1" />
     <PackageReference Include="serilog.sinks.file" Version="4.1.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(IsWindows)' == 'true' ">
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
   </ItemGroup>

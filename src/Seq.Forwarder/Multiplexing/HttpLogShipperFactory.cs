@@ -33,7 +33,7 @@ namespace Seq.Forwarder.Multiplexing
             _outputConfig = outputConfig ?? throw new ArgumentNullException(nameof(outputConfig));
         }
 
-        public LogShipper Create(LogBuffer logBuffer, string apiKey)
+        public LogShipper Create(LogBuffer logBuffer, string? apiKey)
         {
             return new HttpLogShipper(logBuffer, apiKey, _outputConfig, _serverResponseProxy, _outputHttpClient);
         }

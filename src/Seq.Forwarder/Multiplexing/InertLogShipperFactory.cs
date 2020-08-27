@@ -19,7 +19,7 @@ namespace Seq.Forwarder.Multiplexing
 {
     class InertLogShipperFactory : ILogShipperFactory
     {
-        public LogShipper Create(LogBuffer logBuffer, string apiKey)
+        public LogShipper Create(LogBuffer logBuffer, string? apiKey)
         {
             return new InertLogShipper();
         }

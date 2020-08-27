@@ -81,7 +81,7 @@ namespace Seq.Forwarder.Cli.Commands
 
             try
             {
-                ILifetimeScope container = null;
+                ILifetimeScope? container = null;
                 using var host = new HostBuilder()
                     .UseSerilog()
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -97,6 +97,8 @@ namespace Seq.Forwarder.Cli.Commands
                     })
                     .Build();
 
+                if (container == null) throw new Exception("Host did not build container.");
+                
                 var service = container.Resolve<ServerService>(
                     new TypedParameter(typeof(IHost), host),
                     new NamedParameter("listenUri", listenUri));

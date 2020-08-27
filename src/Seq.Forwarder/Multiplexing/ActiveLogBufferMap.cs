@@ -36,7 +36,7 @@ namespace Seq.Forwarder.Multiplexing
 
         readonly object _sync = new object();
         bool _loaded;
-        ActiveLogBuffer _noApiKeyLogBuffer;
+        ActiveLogBuffer? _noApiKeyLogBuffer;
         readonly Dictionary<string, ActiveLogBuffer> _buffersByApiKey = new Dictionary<string, ActiveLogBuffer>();
 
         public ActiveLogBufferMap(string bufferPath, SeqForwarderStorageConfig storageConfig, SeqForwarderOutputConfig outputConfig, ILogShipperFactory logShipperFactory)
@@ -139,7 +139,7 @@ namespace Seq.Forwarder.Multiplexing
             }
         }
 
-        public LogBuffer GetLogBuffer(string apiKey)
+        public LogBuffer GetLogBuffer(string? apiKey)
         {
             lock (_sync)
             {

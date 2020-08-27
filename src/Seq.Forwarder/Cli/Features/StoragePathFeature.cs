@@ -21,7 +21,7 @@ namespace Seq.Forwarder.Cli.Features
 {
     class StoragePathFeature : CommandFeature
     {
-        string _storageRoot;
+        string? _storageRoot;
 
         public string StorageRootPath
         {
@@ -54,9 +54,9 @@ namespace Seq.Forwarder.Cli.Features
                 "Forwarder"));
         }
 
-        static string TryQueryInstalledStorageRoot()
+        static string? TryQueryInstalledStorageRoot()
         {
-            if (ServiceConfiguration.GetServiceStoragePath(SeqForwarderWindowsService.WindowsServiceName, new StringWriter(), out var storage))
+            if (ServiceConfiguration.GetServiceStoragePath(SeqForwarderWindowsService.WindowsServiceName, out var storage))
                 return storage;
 
             return null;

@@ -61,7 +61,8 @@ namespace Seq.Forwarder.Web.Api
             JObject posted;
             try
             {
-                posted = _rawSerializer.Deserialize<JObject>(new JsonTextReader(new StreamReader(Request.Body)));
+                posted = _rawSerializer.Deserialize<JObject>(new JsonTextReader(new StreamReader(Request.Body))) ??
+                    throw new BadRequestException("Request body payload is JSON `null`.");
             }
             catch (Exception ex)
             {
@@ -70,15 +71,14 @@ namespace Seq.Forwarder.Web.Api
             }
 
             if (posted == null ||
-                !(posted.TryGetValue("events", StringComparison.Ordinal, out JToken eventsToken) ||
+                !(posted.TryGetValue("events", StringComparison.Ordinal, out var eventsToken) ||
                   posted.TryGetValue("Events", StringComparison.Ordinal, out eventsToken)))
             {
                 IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid JSON structure", ClientHostIP);
                 return BadRequest("Invalid raw event JSON, body must contain an 'Events' array.");
             }
 
-            var events = eventsToken as JArray;
-            if (events == null)
+            if (!(eventsToken is JArray events))
             {
                 IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid Events property structure", ClientHostIP);
                 return BadRequest("Invalid raw event JSON, the 'Events' property must be an array.");
@@ -99,8 +99,8 @@ namespace Seq.Forwarder.Web.Api
 
                     var jo = e as JObject;
                     // ReSharper disable SuspiciousTypeConversion.Global
-                    var timestamp = (string)(dynamic)jo?.GetValue("Timestamp") ?? DateTime.UtcNow.ToString("o");
-                    var level = (string)(dynamic)jo?.GetValue("Level") ?? "Warning";
+                    var timestamp = (string?)(dynamic?)jo?.GetValue("Timestamp") ?? DateTime.UtcNow.ToString("o");
+                    var level = (string?)(dynamic?)jo?.GetValue("Level") ?? "Warning";
 
                     if (jo != null)
                     {
@@ -138,7 +138,7 @@ namespace Seq.Forwarder.Web.Api
             return response;
         }
 
-        string GetRequestApiKeyToken()
+        string? GetRequestApiKeyToken()
         {
             var apiKeyToken = Request.Headers[SeqApi.ApiKeyHeaderName].FirstOrDefault();
 

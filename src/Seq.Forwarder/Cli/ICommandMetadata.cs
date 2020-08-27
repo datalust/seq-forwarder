@@ -16,7 +16,7 @@ namespace Seq.Forwarder.Cli
 {
     interface ICommandMetadata
     {
-        string Name { get; }
-        string HelpText { get; }
+        string? Name { get; }
+        string? HelpText { get; }
     }
 }

@@ -19,6 +19,6 @@ namespace Seq.Forwarder.Multiplexing
 {
     public interface ILogShipperFactory
     {
-        LogShipper Create(LogBuffer logBuffer, string apiKey);
+        LogShipper Create(LogBuffer logBuffer, string? apiKey);
     }
 }

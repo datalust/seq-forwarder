@@ -15,21 +15,24 @@
 using Newtonsoft.Json;
 using Seq.Forwarder.Util;
 
+// ReSharper disable UnusedMember.Global, AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Seq.Forwarder.Config
 {
     public class SeqForwarderOutputConfig
     {
-        const string ProtectedDataPrefix = "pd.";
-
         public string ServerUrl { get; set; } = "http://localhost:5341";
         public ulong EventBodyLimitBytes { get; set; } = 256 * 1024;
         public ulong RawPayloadLimitBytes { get; set; } = 10 * 1024 * 1024;
 
+#if WINDOWS
+        const string ProtectedDataPrefix = "pd.";
+
         [JsonProperty("apiKey")]
-        public string EncodedApiKey { get; set; }
+        public string? EncodedApiKey { get; set; }
 
         [JsonIgnore]
-        public string ApiKey
+        public string? ApiKey
         {
             get
             {
@@ -53,4 +56,5 @@ namespace Seq.Forwarder.Config
             }
         }
     }
+#endif
 }

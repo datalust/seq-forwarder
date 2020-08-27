@@ -19,14 +19,14 @@ namespace Seq.Forwarder.Util
 {
     class NonBindingSerializationBinder: ISerializationBinder
     {
-        public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+        public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
             assemblyName = typeName = null;
         }
 
-        public Type BindToType(string assemblyName, string typeName)
+        public Type BindToType(string? assemblyName, string typeName)
         {
-            return null;
+            return null!;
         }
     }
 }

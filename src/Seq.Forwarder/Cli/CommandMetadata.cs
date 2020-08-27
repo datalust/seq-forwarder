@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// ReSharper disable ClassNeverInstantiated.Global, UnusedAutoPropertyAccessor.Global
+
 namespace Seq.Forwarder.Cli
 {
     public class CommandMetadata : ICommandMetadata
     {
-        public string Name { get; set; }
-        public string HelpText { get; set; }
+        public string? Name { get; set; }
+        public string? HelpText { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2016-2017 Datalust Pty Ltd
+﻿// Copyright Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ namespace Seq.Forwarder.Cli.Commands
         protected override int Run(string[] unrecognised, TextWriter cout, TextWriter cerr)
         {
             var ea = Assembly.GetEntryAssembly();
-            var name = ea.GetName().Name;
+            var name = ea!.GetName().Name;
 
             if (unrecognised.Length > 0)
             {
@@ -61,6 +61,9 @@ namespace Seq.Forwarder.Cli.Commands
             
             foreach (var availableCommand in _availableCommands)
             {
+                if (availableCommand.Metadata?.Name == null ||
+                    availableCommand.Metadata.HelpText == null) throw new Exception("Command metadata is missing.");
+                
                 Printing.Define(
                     "  " + availableCommand.Metadata.Name,
                     availableCommand.Metadata.HelpText,

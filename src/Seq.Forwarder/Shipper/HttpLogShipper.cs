@@ -32,7 +32,7 @@ namespace Seq.Forwarder.Shipper
     {
         const string BulkUploadResource = "api/events/raw";
 
-        readonly string _apiKey;
+        readonly string? _apiKey;
         readonly LogBuffer _logBuffer;
         readonly SeqForwarderOutputConfig _outputConfig;
         readonly HttpClient _httpClient;
@@ -48,7 +48,7 @@ namespace Seq.Forwarder.Shipper
 
         static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2), MaximumConnectionInterval = TimeSpan.FromMinutes(2);
 
-        public HttpLogShipper(LogBuffer logBuffer, string apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy, HttpClient outputHttpClient)
+        public HttpLogShipper(LogBuffer logBuffer, string? apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy, HttpClient outputHttpClient)
         {
             _apiKey = apiKey;
             _httpClient = outputHttpClient ?? throw new ArgumentNullException(nameof(outputHttpClient));

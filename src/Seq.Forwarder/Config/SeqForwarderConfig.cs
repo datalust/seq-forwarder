@@ -17,12 +17,13 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace Seq.Forwarder.Config
 {
     class SeqForwarderConfig
     {
-        public static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
+        static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver(),
             Converters =
@@ -35,7 +36,8 @@ namespace Seq.Forwarder.Config
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
             var content = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings);
+            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings) ??
+                throw new ArgumentException("Configuration content is null.");
         }
 
         public static void Write(string filename, SeqForwarderConfig data)
