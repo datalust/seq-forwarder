@@ -50,6 +50,12 @@ clients.
 
 ## On macOS or Linux
 
+On Linux, you'll need `liblmdb`:
+
+```
+apt install liblmdb-dev
+```
+
 To run Seq Forwarder, configure the target Seq server URL, and optionally, an API key:
 
 ```shell
