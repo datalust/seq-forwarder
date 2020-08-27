@@ -6,6 +6,10 @@ namespace Seq.Forwarder
 {
     class Program
     {
+#if WINDOWS
+        public const string BinaryName = "seqfwd.exe";
+#endif   
+        
         static int Main(string[] args)
         {
             var builder = new ContainerBuilder();

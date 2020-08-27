@@ -12,16 +12,16 @@
     <AssemblyTitle>Seq Forwarder</AssemblyTitle>
     <Description>Seq HTTP Log Forwarder</Description>
     <Copyright>Copyright © Datalust Pty Ltd and Contributors</Copyright>
-    <AssemblyName>seq-forwarder</AssemblyName>
-    <RuntimeIdentifiers>win81-x64;ubuntu.18.04-x64;osx-x64</RuntimeIdentifiers>
+    <AssemblyName>seqfwd</AssemblyName>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <Nullable>Enable</Nullable>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'win81-x64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`WINDOWS`))' == 'true')">
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'win-x64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`WINDOWS`))' == 'true')">
     <IsWindows>true</IsWindows>
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'ubuntu.18.04-x64' Or '$(SeqForwarderRid)' == 'linux-x64' Or ('$(SeqRid)' == '' And '$([MSBuild]::IsOsPlatform(`LINUX`))' == 'true')">
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'linux-x64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`LINUX`))' == 'true')">
     <IsLinux>true</IsLinux>
     <IsUnix>true</IsUnix>
     <DefineConstants>$(DefineConstants);LINUX;UNIX</DefineConstants>

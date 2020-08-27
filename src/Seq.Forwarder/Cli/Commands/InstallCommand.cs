@@ -115,11 +115,11 @@ namespace Seq.Forwarder.Cli.Commands
             if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out var path))
                 return;
 
-            var current = "\"" + Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "seq-forwarder.exe") + "\"";
+            var current = "\"" + Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, Program.BinaryName) + "\"";
             if (path.StartsWith(current))
                 return;
 
-            var seqRun = path.IndexOf("seq-forwarder.exe\" run", StringComparison.OrdinalIgnoreCase);
+            var seqRun = path.IndexOf(Program.BinaryName + "\" run", StringComparison.OrdinalIgnoreCase);
             if (seqRun == -1)
             {
                 cout.WriteLine("Current binary path is an unrecognized format.");
@@ -128,7 +128,7 @@ namespace Seq.Forwarder.Cli.Commands
 
             cout.WriteLine("Existing service binary path is: {0}", path);
 
-            var trimmed = path.Substring(seqRun + "seq-forwarder.exe ".Length);
+            var trimmed = path.Substring((seqRun + Program.BinaryName + " ").Length);
             var newPath = current + trimmed;
             cout.WriteLine("Updating service binary path configuration to: {0}", newPath);
 
@@ -213,7 +213,7 @@ namespace Seq.Forwarder.Cli.Commands
             if (netshResult != 0)
                 cout.WriteLine($"Could not add URL reservation for {listenUri}: `netsh` returned {netshResult}; ignoring");
 
-            var exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "seq-forwarder.exe");
+            var exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, Program.BinaryName);
             var forwarderRunCmdline = $"\"{exePath}\" run --storage=\"{_storagePath.StorageRootPath}\"";
 
             var binPath = forwarderRunCmdline.Replace("\"", "\\\"");

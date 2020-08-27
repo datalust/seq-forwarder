@@ -18,11 +18,11 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Seq.Forwarder.Util
+namespace Seq.Forwarder.Cryptography
 {
-    static class MachineScopeDataProtection
+    class DpapiMachineScopeDataProtect : IStringDataProtector
     {
-        public static string Unprotect(string @protected)
+        public string Unprotect(string @protected)
         {
             var parts = @protected.Split(new[] { '$' }, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 2)
@@ -34,7 +34,7 @@ namespace Seq.Forwarder.Util
             return Encoding.UTF8.GetString(decoded);
         }
 
-        public static string Protect(string value)
+        public string Protect(string value)
         {
             var salt = new byte[16];
             using (var cp = new RNGCryptoServiceProvider())
@@ -47,4 +47,3 @@ namespace Seq.Forwarder.Util
 }
 
 #endif
-
