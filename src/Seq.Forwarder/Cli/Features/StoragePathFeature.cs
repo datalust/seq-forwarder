@@ -14,8 +14,6 @@
 
 using System;
 using System.IO;
-using Seq.Forwarder.ServiceProcess;
-using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Cli.Features
 {
@@ -56,9 +54,12 @@ namespace Seq.Forwarder.Cli.Features
 
         static string? TryQueryInstalledStorageRoot()
         {
-            if (ServiceConfiguration.GetServiceStoragePath(SeqForwarderWindowsService.WindowsServiceName, out var storage))
+#if WINDOWS
+            if (Seq.Forwarder.Util.ServiceConfiguration.GetServiceStoragePath(
+                Seq.Forwarder.ServiceProcess.SeqForwarderWindowsService.WindowsServiceName, out var storage))
                 return storage;
-
+#endif
+            
             return null;
         }
     }

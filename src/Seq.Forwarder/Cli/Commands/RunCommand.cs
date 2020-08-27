@@ -15,17 +15,17 @@
 using Autofac;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
-using Seq.Forwarder.ServiceProcess;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using System;
 using System.IO;
-using System.ServiceProcess;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Seq.Forwarder.Web.Host;
+
+// ReSharper disable UnusedType.Global
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -146,7 +146,7 @@ namespace Seq.Forwarder.Cli.Commands
                 return SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
             }
 
-            return InstallCommand.CreateDefaultConfig(_storagePath);
+            return SeqForwarderConfig.CreateDefaultConfig(_storagePath.StorageRootPath, _storagePath.ConfigFilePath);
         }
 
         static string GetRollingLogFilePathFormat(string internalLogPath)
@@ -158,12 +158,16 @@ namespace Seq.Forwarder.Cli.Commands
 
         static int RunService(ServerService service)
         {
-            ServiceBase.Run(new ServiceBase[] {
-                new SeqForwarderWindowsService(service)
+#if WINDOWS
+            System.ServiceProcess.ServiceBase.Run(new System.ServiceProcess.ServiceBase[] {
+                new Seq.Forwarder.ServiceProcess.SeqForwarderWindowsService(service)
             });
             return 0;
+#else
+            throw new NotSupportedException("Windows services are not supported on this platform.");            
+#endif
         }
-
+        
         static int RunInteractive(ServerService service, TextWriter cout)
         {
             service.Start();

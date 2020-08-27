@@ -4,22 +4,26 @@ $framework = 'netcoreapp3.1'
 
 function Clean-Output
 {
+    Write-Output "Cleaning output"
 	if(Test-Path ./artifacts) { rm ./artifacts -Force -Recurse }
 }
 
 function Restore-Packages
 {
+    Write-Output "Restoring packages"
 	& dotnet restore
 }
 
 function Execute-Tests
 {
+    Write-Output "Testing native platform version"
     & dotnet test ./test/Seq.Forwarder.Tests/Seq.Forwarder.Tests.csproj -c Release /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version
     if($LASTEXITCODE -ne 0) { exit 3 }
 }
 
 function Create-ArtifactDir
 {
+    Write-Output "Creating artifacts directory"
 	mkdir ./artifacts
 }
 
@@ -27,6 +31,8 @@ function Publish-Archives($version)
 {
 	$rids = @("linux-x64", "osx-x64", "win-x64")
 	foreach ($rid in $rids) {
+        Write-Output "Publishing archive for $rid"
+		
 		& dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
 		if($LASTEXITCODE -ne 0) { exit 4 }
 
@@ -63,3 +69,5 @@ Publish-Archives($version)
 Execute-Tests
 
 Pop-Location
+
+Write-Output "Done."

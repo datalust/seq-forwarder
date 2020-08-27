@@ -47,6 +47,17 @@ namespace Seq.Forwarder.Config
             var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
             File.WriteAllText(filename, content);
         }
+        
+        public static SeqForwarderConfig CreateDefaultConfig(string storageRootPath, string configFilePath)
+        {
+            if (!Directory.Exists(storageRootPath))
+                Directory.CreateDirectory(storageRootPath);
+
+            var config = new SeqForwarderConfig();
+            Write(configFilePath, config);
+
+            return config;
+        }
 
         public SeqForwarderDiagnosticConfig Diagnostics { get; set; } = new SeqForwarderDiagnosticConfig();
         public SeqForwarderOutputConfig Output { get; set; } = new SeqForwarderOutputConfig();

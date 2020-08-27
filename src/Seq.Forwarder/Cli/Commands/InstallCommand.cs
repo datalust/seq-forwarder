@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if WINDOWS
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -181,7 +183,7 @@ namespace Seq.Forwarder.Cli.Commands
             else
             {
                 cout.WriteLine($"Creating a new configuration file in {_storagePath.ConfigFilePath}...");
-                config = CreateDefaultConfig(_storagePath);
+                config =  SeqForwarderConfig.CreateDefaultConfig(_storagePath.StorageRootPath, _storagePath.ConfigFilePath);
             }
             
             if (!string.IsNullOrEmpty(_listenUri.ListenUri))
@@ -263,16 +265,7 @@ namespace Seq.Forwarder.Cli.Commands
                 listenUri += "/";
             return listenUri;
         }
-
-        public static SeqForwarderConfig CreateDefaultConfig(StoragePathFeature storagePath)
-        {
-            if (!Directory.Exists(storagePath.StorageRootPath))
-                Directory.CreateDirectory(storagePath.StorageRootPath);
-
-            var config = new SeqForwarderConfig();
-            SeqForwarderConfig.Write(storagePath.ConfigFilePath, config);
-
-            return config;
-        }
     }
 }
+
+#endif

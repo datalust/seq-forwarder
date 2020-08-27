@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if WINDOWS
+
 using System.Net;
 using System.ServiceProcess;
 using Seq.Forwarder.Web.Host;
@@ -46,3 +48,5 @@ namespace Seq.Forwarder.ServiceProcess
         }
     }
 }
+
+#endif
