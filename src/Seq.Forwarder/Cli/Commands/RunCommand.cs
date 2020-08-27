@@ -23,6 +23,7 @@ using System.IO;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Seq.Forwarder.Util;
 using Seq.Forwarder.Web.Host;
 
 // ReSharper disable UnusedType.Global
@@ -103,8 +104,8 @@ namespace Seq.Forwarder.Cli.Commands
                     new TypedParameter(typeof(IHost), host),
                     new NamedParameter("listenUri", listenUri));
                 
-                var exit = Environment.UserInteractive
-                    ? RunInteractive(service, cout)
+                var exit = ExecutionEnvironment.SupportsStandardIO
+                    ? RunStandardIO(service, cout)
                     : RunService(service);
 
                 return exit;
@@ -168,17 +169,25 @@ namespace Seq.Forwarder.Cli.Commands
 #endif
         }
         
-        static int RunInteractive(ServerService service, TextWriter cout)
+        static int RunStandardIO(ServerService service, TextWriter cout)
         {
             service.Start();
 
-            Console.TreatControlCAsInput = true;
-            var k = Console.ReadKey(true);
-            while (k.Key != ConsoleKey.C || !k.Modifiers.HasFlag(ConsoleModifiers.Control))
-                k = Console.ReadKey(true);
+            try
+            {
+                Console.TreatControlCAsInput = true;
+                var k = Console.ReadKey(true);
+                while (k.Key != ConsoleKey.C || !k.Modifiers.HasFlag(ConsoleModifiers.Control))
+                    k = Console.ReadKey(true);
 
-            cout.WriteLine("Ctrl+C pressed; stopping...");
-            Console.TreatControlCAsInput = false;
+                cout.WriteLine("Ctrl+C pressed; stopping...");
+                Console.TreatControlCAsInput = false;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Console not attached, waiting for any input");
+                Console.Read();
+            }
 
             service.Stop();
 
