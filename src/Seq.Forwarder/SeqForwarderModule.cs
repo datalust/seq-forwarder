@@ -16,6 +16,7 @@ using System;
 using System.Net.Http;
 using Autofac;
 using Seq.Forwarder.Config;
+using Seq.Forwarder.Cryptography;
 using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.Web.Host;
 
@@ -55,6 +56,8 @@ namespace Seq.Forwarder
 
                 return new HttpClient { BaseAddress = new Uri(baseUri) };
             }).SingleInstance();
+
+            builder.RegisterInstance(StringDataProtector.CreatePlatformDefault());
         }
     }
 }

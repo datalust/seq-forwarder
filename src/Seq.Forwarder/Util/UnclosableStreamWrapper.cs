@@ -23,8 +23,7 @@ namespace Seq.Forwarder.Util
 
         public UnclosableStreamWrapper(Stream stream)
         {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            _stream = stream;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
         }
 
         public override void Flush()
