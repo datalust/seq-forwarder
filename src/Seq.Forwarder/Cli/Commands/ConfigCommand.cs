@@ -44,7 +44,9 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
+                var config = File.Exists(_storagePath.ConfigFilePath) ?
+                    SeqForwarderConfig.Read(_storagePath.ConfigFilePath) :
+                    SeqForwarderConfig.CreateDefaultConfig(_storagePath.ConfigFilePath);
 
                 if (_key != null)
                 {

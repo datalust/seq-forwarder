@@ -183,7 +183,7 @@ namespace Seq.Forwarder.Cli.Commands
             else
             {
                 cout.WriteLine($"Creating a new configuration file in {_storagePath.ConfigFilePath}...");
-                config =  SeqForwarderConfig.CreateDefaultConfig(_storagePath.StorageRootPath, _storagePath.ConfigFilePath);
+                config =  SeqForwarderConfig.CreateDefaultConfig(_storagePath.ConfigFilePath);
             }
             
             if (!string.IsNullOrEmpty(_listenUri.ListenUri))

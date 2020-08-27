@@ -17,6 +17,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace Seq.Forwarder.Config
@@ -48,10 +49,11 @@ namespace Seq.Forwarder.Config
             File.WriteAllText(filename, content);
         }
         
-        public static SeqForwarderConfig CreateDefaultConfig(string storageRootPath, string configFilePath)
+        public static SeqForwarderConfig CreateDefaultConfig(string configFilePath)
         {
-            if (!Directory.Exists(storageRootPath))
-                Directory.CreateDirectory(storageRootPath);
+            var dir = Path.GetDirectoryName(configFilePath);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
             var config = new SeqForwarderConfig();
             Write(configFilePath, config);

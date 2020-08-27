@@ -146,7 +146,7 @@ namespace Seq.Forwarder.Cli.Commands
                 return SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
             }
 
-            return SeqForwarderConfig.CreateDefaultConfig(_storagePath.StorageRootPath, _storagePath.ConfigFilePath);
+            return SeqForwarderConfig.CreateDefaultConfig(_storagePath.ConfigFilePath);
         }
 
         static string GetRollingLogFilePathFormat(string internalLogPath)
