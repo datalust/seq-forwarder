@@ -63,7 +63,7 @@ namespace Seq.Forwarder.Cli.Commands
 
             try
             {
-                config = LoadOrCreateConfig();
+                config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
             }
             catch (Exception ex)
             {
@@ -137,17 +137,6 @@ namespace Seq.Forwarder.Cli.Commands
                 loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
             return loggerConfiguration.CreateLogger();
-        }
-
-        // Re-create just in case it was inadvertently deleted.
-        SeqForwarderConfig LoadOrCreateConfig()
-        {
-            if (File.Exists(_storagePath.ConfigFilePath))
-            {
-                return SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-            }
-
-            return SeqForwarderConfig.CreateDefaultConfig(_storagePath.ConfigFilePath);
         }
 
         static string GetRollingLogFilePathFormat(string internalLogPath)

@@ -25,7 +25,17 @@ namespace Seq.Forwarder.Config
 
         public static string GetDefaultInternalLogPath()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Seq\Logs\");
+            return Path.Combine(
+#if WINDOWS
+                // Common, here, because the service may run as Local Service, which has no obvious home
+                // directory.
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+#else
+                // Specific to and writable by the current user.
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+#endif
+                @"Seq",
+                "Logs");
         }
     }
 }

@@ -33,9 +33,17 @@ namespace Seq.Forwarder.Config
             }
         };
 
-        public static SeqForwarderConfig Read(string filename)
+        public static SeqForwarderConfig ReadOrInit(string filename)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(filename))
+            {
+                var config = new SeqForwarderConfig();
+                Write(filename, config);
+                return config;
+            }
+
             var content = File.ReadAllText(filename);
             return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings) ??
                 throw new ArgumentException("Configuration content is null.");
@@ -45,20 +53,13 @@ namespace Seq.Forwarder.Config
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
             if (data == null) throw new ArgumentNullException(nameof(data));
-            var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
-            File.WriteAllText(filename, content);
-        }
-        
-        public static SeqForwarderConfig CreateDefaultConfig(string configFilePath)
-        {
-            var dir = Path.GetDirectoryName(configFilePath);
+
+            var dir = Path.GetDirectoryName(filename);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-
-            var config = new SeqForwarderConfig();
-            Write(configFilePath, config);
-
-            return config;
+            
+            var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
+            File.WriteAllText(filename, content);
         }
 
         public SeqForwarderDiagnosticConfig Diagnostics { get; set; } = new SeqForwarderDiagnosticConfig();

@@ -174,17 +174,8 @@ namespace Seq.Forwarder.Cli.Commands
             if (PathIsNetworkPath(_storagePath.StorageRootPath))
                 throw new ArgumentException("Seq requires a local (or SAN) storage location; network shares are not supported.");
 
-            SeqForwarderConfig config;
-            if (File.Exists(_storagePath.ConfigFilePath))
-            {
-                cout.WriteLine($"Updating the configuration found in {_storagePath.ConfigFilePath}...");
-                config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-            }
-            else
-            {
-                cout.WriteLine($"Creating a new configuration file in {_storagePath.ConfigFilePath}...");
-                config =  SeqForwarderConfig.CreateDefaultConfig(_storagePath.ConfigFilePath);
-            }
+            cout.WriteLine($"Updating the configuration in {_storagePath.ConfigFilePath}...");
+            var config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
             
             if (!string.IsNullOrEmpty(_listenUri.ListenUri))
             {

@@ -37,7 +37,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
+                var config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
                 using var buffer = new ActiveLogBufferMap(_storagePath.BufferPath, config.Storage, config.Output, new InertLogShipperFactory(), StringDataProtector.CreatePlatformDefault());
                 buffer.Load();
                 buffer.Enumerate((k, v) =>
