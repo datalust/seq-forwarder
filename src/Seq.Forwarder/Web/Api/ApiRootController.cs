@@ -15,6 +15,7 @@
 using System.IO;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Seq.Forwarder.Config;
 using Seq.Forwarder.Diagnostics;
 using Serilog.Formatting.Display;
 
@@ -23,16 +24,25 @@ namespace Seq.Forwarder.Web.Api
     public class ApiRootController : Controller
     {
         static readonly Encoding Encoding = new UTF8Encoding(false);
+        readonly MessageTemplateTextFormatter _ingestionLogFormatter;
+
+        public ApiRootController(SeqForwarderDiagnosticConfig diagnosticConfig)
+        {
+            var template = "[{Timestamp:o} {Level:u3}] {Message}{NewLine}";
+            if (diagnosticConfig.IngestionLogShowDetail)
+                template += "Client IP address: {ClientHostIP}{NewLine}First {StartToLog} characters of payload: {DocumentStart:l}{NewLine}{Exception}{NewLine}";
+            
+            _ingestionLogFormatter = new MessageTemplateTextFormatter(template);
+        }
         
         [HttpGet, Route("")]
         public IActionResult Index()
         {
             var events = IngestionLog.Read();
-            var formatter = new MessageTemplateTextFormatter("[{Timestamp:o} {Level:u3}] {Message}{NewLine}{Exception}", null);
             using var log = new StringWriter();
             foreach (var logEvent in events)
             {
-                formatter.Format(logEvent, log);
+                _ingestionLogFormatter.Format(logEvent, log);
             }
 
             return Content(log.ToString(), "text/plain", Encoding);

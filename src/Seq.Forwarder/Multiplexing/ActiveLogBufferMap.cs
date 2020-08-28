@@ -150,7 +150,7 @@ namespace Seq.Forwarder.Multiplexing
         {
             lock (_sync)
             {
-                if (!_loaded) throw new BadRequestException("The forwarder service is starting up.", HttpStatusCode.ServiceUnavailable);
+                if (!_loaded) throw new RequestProcessingException("The forwarder service is starting up.", HttpStatusCode.ServiceUnavailable);
 
                 if (apiKey == null)
                 {

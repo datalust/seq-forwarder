@@ -183,6 +183,11 @@ namespace Seq.Forwarder.Shipper
                 }
                 while (true);
             }
+            catch (HttpRequestException hex)
+            {
+                Log.Warning(hex, "HTTP request failed when sending a batch from the log shipper");
+                _connectionSchedule.MarkFailure();
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Exception while sending a batch from the log shipper");

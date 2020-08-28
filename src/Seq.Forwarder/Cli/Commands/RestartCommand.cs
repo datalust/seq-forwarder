@@ -19,12 +19,13 @@ using System.IO;
 using System.ServiceProcess;
 using Seq.Forwarder.ServiceProcess;
 
+// ReSharper disable UnusedType.Global
+
 namespace Seq.Forwarder.Cli.Commands
 {
     [Command("restart", "Restart the Windows service")]
     class RestartCommand : Command
     {
-
         protected override int Run(TextWriter cout)
         {
             try

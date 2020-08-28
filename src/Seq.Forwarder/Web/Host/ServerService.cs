@@ -14,6 +14,7 @@
 
 using System;
 using Microsoft.Extensions.Hosting;
+using Seq.Forwarder.Diagnostics;
 using Seq.Forwarder.Multiplexing;
 using Serilog;
 
@@ -41,6 +42,7 @@ namespace Seq.Forwarder.Web.Host
                 _host.Start();
 
                 Log.Information("Seq Forwarder listening on {ListenUri}", _listenUri);
+                IngestionLog.Log.Debug("Seq Forwarder is accepting events");
 
                 _logBufferMap.Load();
                 _logBufferMap.Start();

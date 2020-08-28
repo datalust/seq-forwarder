@@ -41,8 +41,6 @@ namespace Seq.Forwarder
                 .SingleInstance();
 
             builder.RegisterType<HttpLogShipperFactory>().As<ILogShipperFactory>();
-            builder.RegisterInstance(_config.Storage);
-            builder.RegisterInstance(_config.Output);
             builder.RegisterType<ServerResponseProxy>().SingleInstance();
 
             builder.Register(c =>
@@ -58,6 +56,12 @@ namespace Seq.Forwarder
             }).SingleInstance();
 
             builder.RegisterInstance(StringDataProtector.CreatePlatformDefault());
+
+            builder.RegisterInstance(_config);
+            builder.RegisterInstance(_config.Api);
+            builder.RegisterInstance(_config.Diagnostics);
+            builder.RegisterInstance(_config.Output);
+            builder.RegisterInstance(_config.Storage);
         }
     }
 }

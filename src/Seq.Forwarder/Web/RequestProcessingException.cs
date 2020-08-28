@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Newtonsoft.Json.Serialization;
 using System;
+using System.Net;
 
-namespace Seq.Forwarder.Util
+namespace Seq.Forwarder.Web
 {
-    class NonBindingSerializationBinder: ISerializationBinder
+    class RequestProcessingException : Exception
     {
-        public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
+        public RequestProcessingException(string message, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
+            : base(message)
         {
-            assemblyName = typeName = null;
+            StatusCode = statusCode;
         }
 
-        public Type BindToType(string? assemblyName, string typeName)
-        {
-            return null!;
-        }
+        public HttpStatusCode StatusCode { get; }
     }
 }

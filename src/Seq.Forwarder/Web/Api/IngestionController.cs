@@ -25,10 +25,10 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Seq.Forwarder.Config;
+using Seq.Forwarder.Diagnostics;
 using Seq.Forwarder.Multiplexing;
 using Seq.Forwarder.Schema;
 using Seq.Forwarder.Shipper;
-using Serilog;
 
 namespace Seq.Forwarder.Web.Api
 {
@@ -36,8 +36,6 @@ namespace Seq.Forwarder.Web.Api
     {
         static readonly Encoding Encoding = new UTF8Encoding(false);
         const string ClefMediaType = "application/vnd.serilog.clef";
-
-        static ILogger IngestionLog => Diagnostics.IngestionLog.Log;
 
         readonly ActiveLogBufferMap _logBufferMap;
         readonly SeqForwarderOutputConfig _outputConfig;
@@ -85,29 +83,26 @@ namespace Seq.Forwarder.Web.Api
             try
             {
                 posted = _rawSerializer.Deserialize<JObject>(new JsonTextReader(new StreamReader(Request.Body))) ??
-                         throw new Exception("Request body payload is JSON `null`.");
+                         throw new RequestProcessingException("Request body payload is JSON `null`.");
             }
             catch (Exception ex)
             {
-                IngestionLog.Debug(ex,
-                    "Rejecting payload from {ClientHostIP} due to invalid JSON, request body could not be parsed",
-                    ClientHostIP);
-                return BadRequest("Invalid raw event JSON, body could not be parsed.");
+                IngestionLog.ForClient(ClientHostIP).Debug(ex,"Rejecting payload due to invalid JSON, request body could not be parsed");
+                throw new RequestProcessingException("Invalid raw event JSON, body could not be parsed.");
             }
 
             if (posted == null ||
                 !(posted.TryGetValue("events", StringComparison.Ordinal, out var eventsToken) ||
                   posted.TryGetValue("Events", StringComparison.Ordinal, out eventsToken)))
             {
-                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid JSON structure", ClientHostIP);
-                return BadRequest("Invalid raw event JSON, body must contain an 'Events' array.");
+                IngestionLog.ForClient(ClientHostIP).Debug("Rejecting payload due to invalid JSON structure");
+                throw new RequestProcessingException("Invalid raw event JSON, body must contain an 'Events' array.");
             }
 
             if (!(eventsToken is JArray events))
             {
-                IngestionLog.Debug("Rejecting payload from {ClientHostIP} due to invalid Events property structure",
-                    ClientHostIP);
-                return BadRequest("Invalid raw event JSON, the 'Events' property must be an array.");
+                IngestionLog.ForClient(ClientHostIP).Debug("Rejecting payload due to invalid Events property structure");
+                throw new RequestProcessingException("Invalid raw event JSON, the 'Events' property must be an array.");
             }
 
             var encoded = EncodeRawEvents(events);
@@ -126,32 +121,22 @@ namespace Seq.Forwarder.Web.Api
             {
                 if (!string.IsNullOrWhiteSpace(line))
                 {
-                    if (line.Length > (int) _outputConfig.EventBodyLimitBytes)
-                    {
-                        var prefix = CapturePrefix(line);
-                        IngestionLog.ForContext<IngestionController>().Debug("Rejecting CLEF payload from {ClientHostIP} due to oversized event; first {StartToLog} chars of {EventSize}: {DocumentStart:l}", HttpContext.Connection.RemoteIpAddress, prefix.Length, line.Length, prefix);
-                        return BadRequest($"The event on line {lineNumber} exceeded the maximum event body size; first {prefix.Length} chars: {prefix}.");
-                    }
-
                     JObject item;
                     try
                     {
                         item = _rawSerializer.Deserialize<JObject>(new JsonTextReader(new StringReader(line))) ??
-                               throw new Exception("Request body payload is JSON `null`.");
+                               throw new RequestProcessingException("Request body payload is JSON `null`.");
                     }
                     catch (Exception ex)
                     {
-                        var prefix = CapturePrefix(line);
-                        IngestionLog.ForContext<IngestionController>()
-                            .Debug(ex, "Rejecting CLEF payload from {ClientHostIP} due to invalid JSON, item could not be parsed; first {StartToLog} chars of {EventSize}: {DocumentStart:l}", HttpContext.Connection.RemoteIpAddress, prefix.Length, line.Length, prefix);
-                        return BadRequest($"Invalid raw event JSON, item on line {lineNumber} could not be parsed.");
+                        IngestionLog.ForPayload(ClientHostIP, line).Debug(ex, "Rejecting CLEF payload due to invalid JSON, item could not be parsed");
+                        throw new RequestProcessingException($"Invalid raw event JSON, item on line {lineNumber} could not be parsed.");
                     }
 
                     if (!EventSchema.FromClefFormat(lineNumber, item, out var evt, out var err))
                     {
-                        var prefix = CapturePrefix(line);
-                        IngestionLog.ForContext<IngestionController>().Debug("Rejecting CLEF payload from {ClientHostIP} due to invalid event JSON structure: {NormalizationError}; first {StartToLog} chars of {EventSize}: {DocumentStart:l}", HttpContext.Connection.RemoteIpAddress, err, prefix.Length, line.Length, prefix);
-                        return BadRequest(err);
+                        IngestionLog.ForPayload(ClientHostIP, line).Debug("Rejecting CLEF payload due to invalid event JSON structure: {NormalizationError}", err);
+                        throw new RequestProcessingException(err);
                     }
 
                     rawFormat.Add(evt);
@@ -176,11 +161,7 @@ namespace Seq.Forwarder.Web.Api
 
                 if (payload.Length > (int) _outputConfig.EventBodyLimitBytes)
                 {
-                    var startToLog = (int) Math.Min(_outputConfig.EventBodyLimitBytes / 2, 1024);
-                    var prefix = s.Substring(0, startToLog);
-                    IngestionLog.Debug(
-                        "Invalid payload from {ClientHostIP} due to oversized event; first {StartToLog} chars: {DocumentStart:l}",
-                        ClientHostIP, startToLog, prefix);
+                    IngestionLog.ForPayload(ClientHostIP, s).Debug("An oversized event was dropped");
 
                     var jo = e as JObject;
                     // ReSharper disable SuspiciousTypeConversion.Global
@@ -193,6 +174,7 @@ namespace Seq.Forwarder.Web.Api
                         jo.Remove("Level");
                     }
 
+                    var startToLog = (int) Math.Min(_outputConfig.EventBodyLimitBytes / 2, 1024);
                     var compactPrefix = e.ToString(Formatting.None).Substring(0, startToLog);
 
                     encoded[i] = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new
@@ -204,7 +186,8 @@ namespace Seq.Forwarder.Web.Api
                         {
                             Partial = compactPrefix,
                             Environment.MachineName,
-                            _outputConfig.EventBodyLimitBytes
+                            _outputConfig.EventBodyLimitBytes,
+                            PayloadBytes = payload.Length
                         }
                     }));
                 }
@@ -259,13 +242,6 @@ namespace Seq.Forwarder.Web.Api
             }
 
             return "true".Equals(value, StringComparison.OrdinalIgnoreCase) || value == "" || value == queryParameterName;
-        }
-        
-        static string CapturePrefix(string line)
-        {
-            if (line == null) throw new ArgumentNullException(nameof(line));
-            var startToLog = Math.Min(line.Length, 1024);
-            return line.Substring(0, startToLog);
         }
     }
 }

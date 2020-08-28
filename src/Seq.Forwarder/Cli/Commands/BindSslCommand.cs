@@ -51,7 +51,7 @@ namespace Seq.Forwarder.Cli.Commands
                 CaptiveProcess.Run("netsh", $"http delete sslcert {scope}");
 
                 var addResult = CaptiveProcess.Run("netsh",
-                    $"http add sslcert {scope} appid={{A83C9D58-EB0C-4EF3-A9A5-9C4542204460}} certhash={_thumbprint} certstorename=my",
+                    $"http add sslcert {scope} appid={{25871FA4-D897-49D3-9B35-FFA8E99738F7}} certhash={_thumbprint} certstorename=my",
                     Console.WriteLine,
                     e =>
                     {

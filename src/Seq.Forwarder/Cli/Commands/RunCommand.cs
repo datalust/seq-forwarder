@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Seq.Forwarder.Util;
 using Seq.Forwarder.Web.Host;
+using Serilog.Core;
 
 // ReSharper disable UnusedType.Global
 
@@ -67,16 +68,19 @@ namespace Seq.Forwarder.Cli.Commands
             }
             catch (Exception ex)
             {
-                var logger = CreateLogger(
+                using var logger = CreateLogger(
                     LogEventLevel.Information,
                     SeqForwarderDiagnosticConfig.GetDefaultInternalLogPath());
 
                 logger.Fatal(ex, "Failed to load configuration from {ConfigFilePath}", _storagePath.ConfigFilePath);
-                (logger as IDisposable)?.Dispose();
                 return 1;
             }
 
-            Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
+            Log.Logger = CreateLogger(
+                config.Diagnostics.InternalLoggingLevel,
+                config.Diagnostics.InternalLogPath,
+                config.Diagnostics.InternalLogServerUri,
+                config.Diagnostics.InternalLogServerApiKey);
 
             var listenUri = _listenUri.ListenUri ?? config.Api.ListenUri;
 
@@ -121,10 +125,16 @@ namespace Seq.Forwarder.Cli.Commands
             }
         }
 
-        static ILogger CreateLogger(LogEventLevel internalLoggingLevel, string internalLogPath)
+        static Logger CreateLogger(
+            LogEventLevel internalLoggingLevel,
+            string internalLogPath,
+            string? internalLogServerUri = null,
+            string? internalLogServerApiKey = null)
         {
             var loggerConfiguration = new LoggerConfiguration()
                 .Enrich.FromLogContext()
+                .Enrich.WithProperty("MachineName", Environment.MachineName)
+                .Enrich.WithProperty("Application", "Seq Forwarder")
                 .MinimumLevel.Is(internalLoggingLevel)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .WriteTo.File(
@@ -135,6 +145,12 @@ namespace Seq.Forwarder.Cli.Commands
 
             if (Environment.UserInteractive)
                 loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
+
+            if (!string.IsNullOrWhiteSpace(internalLogServerUri))
+                loggerConfiguration.WriteTo.Seq(
+                    internalLogServerUri,
+                    apiKey: internalLogServerApiKey,
+                    compact: true);
 
             return loggerConfiguration.CreateLogger();
         }
