@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Datalust Pty Ltd
+// Copyright Datalust Pty Ltd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,44 +13,43 @@
 // limitations under the License.
 
 using Newtonsoft.Json;
-using Seq.Forwarder.Util;
+using Seq.Forwarder.Cryptography;
+
+// ReSharper disable UnusedMember.Global, AutoPropertyCanBeMadeGetOnly.Global
 
 namespace Seq.Forwarder.Config
 {
-    class SeqForwarderOutputConfig
+    public class SeqForwarderOutputConfig
     {
-        const string ProtectedDataPrefix = "pd.";
-
         public string ServerUrl { get; set; } = "http://localhost:5341";
         public ulong EventBodyLimitBytes { get; set; } = 256 * 1024;
         public ulong RawPayloadLimitBytes { get; set; } = 10 * 1024 * 1024;
 
+        const string ProtectedDataPrefix = "pd.";
+
         [JsonProperty("apiKey")]
-        public string EncodedApiKey { get; set; }
+        public string? EncodedApiKey { get; set; }
 
-        [JsonIgnore]
-        public string ApiKey
+        public string? GetApiKey(IStringDataProtector dataProtector)
         {
-            get
+            if (string.IsNullOrWhiteSpace(EncodedApiKey))
+                return null;
+
+            if (!EncodedApiKey.StartsWith(ProtectedDataPrefix))
+                return EncodedApiKey;
+
+            return dataProtector.Unprotect(EncodedApiKey.Substring(ProtectedDataPrefix.Length));
+        }
+        
+        public void SetApiKey(string? apiKey, IStringDataProtector dataProtector)
+        {
+            if (string.IsNullOrWhiteSpace(apiKey))
             {
-                if (string.IsNullOrWhiteSpace(EncodedApiKey))
-                    return null;
-
-                if (!EncodedApiKey.StartsWith(ProtectedDataPrefix))
-                    return EncodedApiKey;
-
-                return MachineScopeDataProtection.Unprotect(EncodedApiKey.Substring(ProtectedDataPrefix.Length));
+                EncodedApiKey = null;
+                return;
             }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    EncodedApiKey = null;
-                    return;
-                }
 
-                EncodedApiKey = $"{ProtectedDataPrefix}{MachineScopeDataProtection.Protect(value)}";
-            }
+            EncodedApiKey = $"{ProtectedDataPrefix}{dataProtector.Protect(apiKey)}";
         }
     }
 }

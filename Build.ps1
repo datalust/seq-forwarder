@@ -1,82 +1,73 @@
+$ErrorActionPreference = 'Stop'
+
+$framework = 'netcoreapp3.1'
+
 function Clean-Output
 {
+    Write-Output "Cleaning output"
 	if(Test-Path ./artifacts) { rm ./artifacts -Force -Recurse }
 }
 
 function Restore-Packages
 {
-	& nuget restore
-}
-
-function Update-AssemblyInfo($version)
-{  
-    $versionPattern = "[0-9]+(\.([0-9]+|\*)){3}"
-
-	$file = "./src/Seq.Forwarder.Administration/Properties/AssemblyInfo.cs"
-    (cat $file) | foreach {  
-            % {$_ -replace $versionPattern, "$version.0" }             
-        } | sc -Encoding "UTF8" $file                                 
-	if($LASTEXITCODE -ne 0) { exit 1 }
-}
-
-function Update-WixVersion($version)
-{
-    $defPattern = "define Version = ""0\.0\.0"""
-	$def = "define Version = ""$version"""
-    $product = ".\setup\SeqForwarder\Product.wxs"
-
-    (cat $product) | foreach {  
-            % {$_ -replace $defPattern, $def }    
-        } | sc -Encoding "UTF8" $product
-	if($LASTEXITCODE -ne 0) { exit 1 }
-}
-
-function Execute-MSBuild($version, $suffix)
-{
-	Write-Output "Building $version (suffix=$suffix)"
-
-	if ($suffix) {
-		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version /p:VersionSuffix=$suffix
-	} else {
-		& msbuild ./seq-forwarder.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version
-	}
-	if($LASTEXITCODE -ne 0) { exit 1 }
+    Write-Output "Restoring packages"
+	& dotnet restore
 }
 
 function Execute-Tests
 {
-    pushd ./test/Seq.Forwarder.Tests
-
-    & dotnet test -c Release
+    Write-Output "Testing native platform version"
+    & dotnet test ./test/Seq.Forwarder.Tests/Seq.Forwarder.Tests.csproj -c Release /p:Configuration=Release /p:Platform=x64 /p:VersionPrefix=$version
     if($LASTEXITCODE -ne 0) { exit 3 }
-
-    popd
 }
 
-function Publish-Artifacts($version, $suffix)
+function Create-ArtifactDir
 {
-	$dashsuffix = "";
-	if ($suffix) {
-		$dashsuffix = "-$suffix";
-	}
+    Write-Output "Creating artifacts directory"
 	mkdir ./artifacts
-	mv ./setup/SeqForwarder/bin/Release/SeqForwarder.msi ./artifacts/SeqForwarder-$version$dashsuffix.msi
-	if($LASTEXITCODE -ne 0) { exit 1 }
+}
+
+function Publish-Archives($version)
+{
+	$rids = @("linux-x64", "osx-x64", "win-x64")
+	foreach ($rid in $rids) {
+        Write-Output "Publishing archive for $rid"
+		
+		& dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
+		if($LASTEXITCODE -ne 0) { exit 4 }
+
+		# Make sure the archive contains a reasonable root filename
+		mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
+
+		if ($rid.StartsWith("win-")) {
+			& ./build/7-zip/7za.exe a -tzip ./artifacts/seqfwd-$version-$rid.zip ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
+			if($LASTEXITCODE -ne 0) { exit 5 }
+		} else {
+			& ./build/7-zip/7za.exe a -ttar seqfwd-$version-$rid.tar ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
+			if($LASTEXITCODE -ne 0) { exit 5 }
+
+			# Back to the original directory name
+			mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/
+			
+			& ./build/7-zip/7za.exe a -tgzip ./artifacts/seqfwd-$version-$rid.tar.gz seqfwd-$version-$rid.tar
+			if($LASTEXITCODE -ne 0) { exit 6 }
+
+			rm seqfwd-$version-$rid.tar
+		}
+	}
 }
 
 Push-Location $PSScriptRoot
 
 $version = @{ $true = $env:APPVEYOR_BUILD_VERSION; $false = "99.99.99" }[$env:APPVEYOR_BUILD_VERSION -ne $NULL];
-$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
-$suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
+Write-Output "Building version $version"
 
 Clean-Output
+Create-ArtifactDir
 Restore-Packages
-Update-WixVersion $version
-Update-AssemblyInfo $version
-Execute-MSBuild $version $suffix
+Publish-Archives($version)
 Execute-Tests
-Publish-Artifacts $version $suffix
 
 Pop-Location
+
+Write-Output "Done."

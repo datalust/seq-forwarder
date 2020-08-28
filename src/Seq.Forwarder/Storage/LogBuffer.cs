@@ -20,7 +20,7 @@ using Serilog;
 
 namespace Seq.Forwarder.Storage
 {
-    class LogBuffer : IDisposable
+    public class LogBuffer : IDisposable
     {
         readonly ulong _bufferSizeBytes;
         readonly LightningEnvironment _env;
@@ -115,8 +115,7 @@ namespace Seq.Forwarder.Storage
             using (var db = tx.OpenDatabase())
             {
                 int err;
-                MDBEnvInfo estat;
-                if (0 != (err = Lmdb.mdb_env_info(_env.Handle(), out estat)))
+                if (0 != (err = Lmdb.mdb_env_info(_env.Handle(), out var estat)))
                     throw new Exception(Lmdb.mdb_strerror(err));
 
                 MDBStat stat;

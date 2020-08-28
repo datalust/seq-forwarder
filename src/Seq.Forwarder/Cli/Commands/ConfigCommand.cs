@@ -28,7 +28,7 @@ namespace Seq.Forwarder.Cli.Commands
     {
         readonly StoragePathFeature _storagePath;
 
-        string _key, _value;
+        string? _key, _value;
         bool _clear;
 
         public ConfigCommand()
@@ -44,7 +44,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
+                var config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
 
                 if (_key != null)
                 {
@@ -85,13 +85,13 @@ namespace Seq.Forwarder.Cli.Commands
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (key == null) throw new ArgumentNullException(nameof(key));
 
-            var pr = ReadPairs(config).SingleOrDefault(p => p.Key == key);
-            if (pr.Key == null)
+            var (foundKey, value) = ReadPairs(config).SingleOrDefault(p => p.Key == key);
+            if (foundKey == null)
                 throw new ArgumentException($"Option {key} not found");
-            cout.WriteLine(pr.Value);
+            cout.WriteLine(value);
         }
 
-        static void Set(SeqForwarderConfig config, string key, string value)
+        static void Set(SeqForwarderConfig config, string key, string? value)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (key == null) throw new ArgumentNullException(nameof(key));
@@ -101,16 +101,17 @@ namespace Seq.Forwarder.Cli.Commands
                 throw new ArgumentException("The format of the key is incorrect; run the command without any arguments to view all keys.");
 
             var first = config.GetType().GetTypeInfo().DeclaredProperties
-                .Where(p => p.GetMethod.IsPublic && !p.GetMethod.IsStatic)
+                .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic)
                 .SingleOrDefault(p => Camelize(p.Name) == steps[0]);
 
             if (first == null)
                 throw new ArgumentException("The key could not be found; run the command without any arguments to view all keys.");
 
             var v = first.GetValue(config);
+            if (v == null) throw new ArgumentException("Config is invalid; first property path step is null.");
 
             var second = v.GetType().GetTypeInfo().DeclaredProperties
-                .Where(p => p.GetMethod.IsPublic && p.SetMethod.IsPublic && !p.GetMethod.IsStatic)
+                .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null && p.SetMethod.IsPublic && !p.GetMethod.IsStatic)
                 .SingleOrDefault(p => Camelize(p.Name) == steps[1]);
 
             if (second == null)
@@ -134,22 +135,24 @@ namespace Seq.Forwarder.Cli.Commands
             }
         }
 
-        static IEnumerable<KeyValuePair<string, object>> ReadPairs(object config)
+        static IEnumerable<KeyValuePair<string, object?>> ReadPairs(object config)
         {
             foreach (var first in config.GetType().GetTypeInfo().DeclaredProperties
-                .Where(p => p.GetMethod.IsPublic && !p.GetMethod.IsStatic)
+                .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic)
                 .OrderBy(p => p.Name))
             {
                 var step1 = Camelize(first.Name) + ".";
                 var v = first.GetValue(config);
+                if (v == null) throw new ArgumentException("Config is invalid; first property path step is null.");
 
                 foreach (var second in v.GetType().GetTypeInfo().DeclaredProperties
-                    .Where(p => p.GetMethod.IsPublic && p.SetMethod.IsPublic && !p.GetMethod.IsStatic && !p.Name.StartsWith("Encoded"))
+                    .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null &&
+                                p.SetMethod.IsPublic && !p.GetMethod.IsStatic && !p.Name.StartsWith("Encoded"))
                     .OrderBy(p => p.Name))
                 {
                     var name = step1 + Camelize(second.Name);
                     var v2 = second.GetValue(v);
-                    yield return new KeyValuePair<string, object>(name, v2);
+                    yield return new KeyValuePair<string, object?>(name, v2);
                 }
             }
         }

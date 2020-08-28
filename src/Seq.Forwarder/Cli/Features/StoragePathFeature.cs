@@ -14,14 +14,12 @@
 
 using System;
 using System.IO;
-using Seq.Forwarder.ServiceProcess;
-using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Cli.Features
 {
     class StoragePathFeature : CommandFeature
     {
-        string _storageRoot;
+        string? _storageRoot;
 
         public string StorageRootPath
         {
@@ -49,16 +47,26 @@ namespace Seq.Forwarder.Cli.Features
         static string GetDefaultStorageRoot()
         {
             return Path.GetFullPath(Path.Combine(
+#if WINDOWS
+                // Common, here, because the service may run as Local Service, which has no obvious home
+                // directory.
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                @"Seq",
+#else
+                // Specific to and writable by the current user.
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+#endif
+                "Seq",
                 "Forwarder"));
         }
 
-        static string TryQueryInstalledStorageRoot()
+        static string? TryQueryInstalledStorageRoot()
         {
-            if (ServiceConfiguration.GetServiceStoragePath(SeqForwarderWindowsService.WindowsServiceName, new StringWriter(), out var storage))
+#if WINDOWS
+            if (Seq.Forwarder.Util.ServiceConfiguration.GetServiceStoragePath(
+                Seq.Forwarder.ServiceProcess.SeqForwarderWindowsService.WindowsServiceName, out var storage))
                 return storage;
-
+#endif
+            
             return null;
         }
     }

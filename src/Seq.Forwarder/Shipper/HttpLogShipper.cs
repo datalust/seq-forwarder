@@ -19,12 +19,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
-using Nancy.IO;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Storage;
 using Serilog;
 using System.Threading.Tasks;
 using Seq.Forwarder.Multiplexing;
+using Seq.Forwarder.Util;
 
 namespace Seq.Forwarder.Shipper
 {
@@ -32,7 +32,7 @@ namespace Seq.Forwarder.Shipper
     {
         const string BulkUploadResource = "api/events/raw";
 
-        readonly string _apiKey;
+        readonly string? _apiKey;
         readonly LogBuffer _logBuffer;
         readonly SeqForwarderOutputConfig _outputConfig;
         readonly HttpClient _httpClient;
@@ -48,7 +48,7 @@ namespace Seq.Forwarder.Shipper
 
         static readonly TimeSpan QuietWaitPeriod = TimeSpan.FromSeconds(2), MaximumConnectionInterval = TimeSpan.FromMinutes(2);
 
-        public HttpLogShipper(LogBuffer logBuffer, string apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy, HttpClient outputHttpClient)
+        public HttpLogShipper(LogBuffer logBuffer, string? apiKey, SeqForwarderOutputConfig outputConfig, ServerResponseProxy serverResponseProxy, HttpClient outputHttpClient)
         {
             _apiKey = apiKey;
             _httpClient = outputHttpClient ?? throw new ArgumentNullException(nameof(outputHttpClient));
@@ -162,7 +162,7 @@ namespace Seq.Forwarder.Shipper
                         if (sendingSingles != 0)
                         {
                             payload.Position = 0;
-                            var payloadText = new StreamReader(payload, Encoding.UTF8).ReadToEnd();
+                            var payloadText = await new StreamReader(payload, Encoding.UTF8).ReadToEndAsync();
                             Log.Error("HTTP shipping failed with {StatusCode}: {Result}; payload was {InvalidPayload}", result.StatusCode, await result.Content.ReadAsStringAsync(), payloadText);
                             _logBuffer.Dequeue(lastIncluded);
                             sendingSingles = 0;
@@ -182,6 +182,11 @@ namespace Seq.Forwarder.Shipper
                     }
                 }
                 while (true);
+            }
+            catch (HttpRequestException hex)
+            {
+                Log.Warning(hex, "HTTP request failed when sending a batch from the log shipper");
+                _connectionSchedule.MarkFailure();
             }
             catch (Exception ex)
             {

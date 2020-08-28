@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Seq.Forwarder": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "run"
     }
   }
 }

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// ReSharper disable InconsistentNaming
+
 namespace Seq.Forwarder.Storage
 {
-    struct LogBufferEntry
+    public struct LogBufferEntry
     {
         public ulong Key;
         public byte[] Value;

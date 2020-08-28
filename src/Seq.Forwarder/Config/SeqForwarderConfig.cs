@@ -18,11 +18,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Seq.Forwarder.Config
 {
     class SeqForwarderConfig
     {
-        public static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
+        static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver(),
             Converters =
@@ -31,17 +33,31 @@ namespace Seq.Forwarder.Config
             }
         };
 
-        public static SeqForwarderConfig Read(string filename)
+        public static SeqForwarderConfig ReadOrInit(string filename)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(filename))
+            {
+                var config = new SeqForwarderConfig();
+                Write(filename, config);
+                return config;
+            }
+
             var content = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings);
+            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings) ??
+                throw new ArgumentException("Configuration content is null.");
         }
 
         public static void Write(string filename, SeqForwarderConfig data)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
             if (data == null) throw new ArgumentNullException(nameof(data));
+
+            var dir = Path.GetDirectoryName(filename);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            
             var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
             File.WriteAllText(filename, content);
         }

@@ -12,24 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Seq.Forwarder.Cli.Features
 {
     class ListenUriFeature : CommandFeature
     {
-        string _listenUri;
-
-        public string ListenUri
-        {
-            get { return _listenUri; }
-        }
+        public string? ListenUri { get; private set; }
 
         public override void Enable(OptionSet options)
         {
             options.Add("l=|listen=",
                 "Set the listen Uri; http://localhost:15341/ is used by default.",
-                v => _listenUri = v);
+                v => ListenUri = v);
         }
     }
 }

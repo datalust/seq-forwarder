@@ -16,7 +16,7 @@ using System;
 
 namespace Seq.Forwarder.Shipper
 {
-    abstract class LogShipper : IDisposable
+    public abstract class LogShipper : IDisposable
     {
         public abstract void Start();
         public abstract void Stop();

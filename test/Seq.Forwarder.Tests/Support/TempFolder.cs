@@ -9,27 +9,25 @@ namespace Seq.Forwarder.Tests.Support
     {
         static readonly Guid Session = Guid.NewGuid();
 
-        readonly string _tempFolder;
-
         public TempFolder(string name)
         {
-            _tempFolder = System.IO.Path.Combine(
+            Path = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "Seq.Forwarder.Tests",
                 Session.ToString("n"),
                 name);
 
-            Directory.CreateDirectory(_tempFolder);
+            Directory.CreateDirectory(Path);
         }
 
-        public string Path => _tempFolder;
+        public string Path { get; }
 
         public void Dispose()
         {
             try
             {
-                if (Directory.Exists(_tempFolder))
-                    Directory.Delete(_tempFolder, true);
+                if (Directory.Exists(Path))
+                    Directory.Delete(Path, true);
             }
             catch (Exception ex)
             {
@@ -37,13 +35,13 @@ namespace Seq.Forwarder.Tests.Support
             }
         }
 
-        public static TempFolder ForCaller([CallerMemberName] string caller = null)
+        public static TempFolder ForCaller([CallerMemberName] string? caller = null)
         {
             if (caller == null) throw new ArgumentNullException(nameof(caller));
             return new TempFolder(caller);
         }
 
-        public string AllocateFilename(string ext = null)
+        public string AllocateFilename(string? ext = null)
         {
             return System.IO.Path.Combine(Path, Guid.NewGuid().ToString("n") + "." + (ext ?? "tmp"));
         }

@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
+using System.Net;
 using Serilog;
 using Serilog.Events;
 
@@ -22,22 +24,42 @@ namespace Seq.Forwarder.Diagnostics
     {
         const int Capacity = 100;
 
-        static readonly InMemorySink _sink = new InMemorySink(Capacity);
+        static readonly InMemorySink Sink = new InMemorySink(Capacity);
+        
+        public static ILogger Log { get; }
 
         static IngestionLog()
         {
             Log = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
-                .WriteTo.Sink(_sink)
+                .WriteTo.Sink(Sink)
                 .WriteTo.Logger(Serilog.Log.Logger)
                 .CreateLogger();
         }
 
-        public static ILogger Log { get; }
-
         public static IEnumerable<LogEvent> Read()
         {
-            return _sink.Read();
-        } 
+            return Sink.Read();
+        }
+
+        public static ILogger ForClient(IPAddress clientHostIP)
+        {
+            return Log.ForContext("ClientHostIP", clientHostIP);
+        }
+
+        public static ILogger ForPayload(IPAddress clientHostIP, string payload)
+        {
+            var prefix = CapturePrefix(payload);
+            return ForClient(clientHostIP)
+                .ForContext("StartToLog", prefix.Length)
+                .ForContext("DocumentStart", prefix);
+        }
+
+        static string CapturePrefix(string line)
+        {
+            if (line == null) throw new ArgumentNullException(nameof(line));
+            var startToLog = Math.Min(line.Length, 1024);
+            return line.Substring(0, startToLog);
+        }
     }
 }
