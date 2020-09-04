@@ -27,29 +27,28 @@ namespace Seq.Forwarder.Config
 
         const string ProtectedDataPrefix = "pd.";
 
-        [JsonProperty("apiKey")]
-        public string? EncodedApiKey { get; set; }
+        public string? ApiKey { get; set; }
 
         public string? GetApiKey(IStringDataProtector dataProtector)
         {
-            if (string.IsNullOrWhiteSpace(EncodedApiKey))
+            if (string.IsNullOrWhiteSpace(ApiKey))
                 return null;
 
-            if (!EncodedApiKey.StartsWith(ProtectedDataPrefix))
-                return EncodedApiKey;
+            if (!ApiKey.StartsWith(ProtectedDataPrefix))
+                return ApiKey;
 
-            return dataProtector.Unprotect(EncodedApiKey.Substring(ProtectedDataPrefix.Length));
+            return dataProtector.Unprotect(ApiKey.Substring(ProtectedDataPrefix.Length));
         }
         
         public void SetApiKey(string? apiKey, IStringDataProtector dataProtector)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
             {
-                EncodedApiKey = null;
+                ApiKey = null;
                 return;
             }
 
-            EncodedApiKey = $"{ProtectedDataPrefix}{dataProtector.Protect(apiKey)}";
+            ApiKey = $"{ProtectedDataPrefix}{dataProtector.Protect(apiKey)}";
         }
     }
 }

@@ -147,7 +147,7 @@ namespace Seq.Forwarder.Cli.Commands
 
                 foreach (var second in v.GetType().GetTypeInfo().DeclaredProperties
                     .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null &&
-                                p.SetMethod.IsPublic && !p.GetMethod.IsStatic && !p.Name.StartsWith("Encoded"))
+                                p.SetMethod.IsPublic && !p.GetMethod.IsStatic && !p.Name.Equals(nameof(SeqForwarderOutputConfig.ApiKey)))
                     .OrderBy(p => p.Name))
                 {
                     var name = step1 + Camelize(second.Name);

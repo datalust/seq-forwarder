@@ -14,6 +14,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -45,8 +48,28 @@ namespace Seq.Forwarder.Config
             }
 
             var content = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings) ??
-                throw new ArgumentException("Configuration content is null.");
+            var seqForwarderConfig = JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings);
+
+            // Any Environment Variables overwrite those in the Config File
+            var envVarConfig = new ConfigurationBuilder().AddEnvironmentVariables("FORWARDER_").Build();
+            foreach (var sectionProperty in typeof(SeqForwarderConfig).GetTypeInfo().DeclaredProperties
+                .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic))
+            {
+                foreach (var subGroupProperty in sectionProperty.PropertyType.GetTypeInfo().DeclaredProperties
+                    .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null && p.SetMethod.IsPublic && !p.GetMethod.IsStatic))
+                {
+                    var envVarName = sectionProperty.Name.ToUpper() + "_" + subGroupProperty.Name.ToUpper();
+                    var envVarVal = envVarConfig.GetValue(subGroupProperty.PropertyType, envVarName);
+                    if (envVarVal != null)
+                    {
+                        seqForwarderConfig ??= new SeqForwarderConfig();
+                        subGroupProperty.SetValue(sectionProperty.GetValue(seqForwarderConfig), envVarVal);
+                    }
+                }
+            }
+
+            return seqForwarderConfig ?? 
+                   throw new ArgumentException("Configuration content is null.");
         }
 
         public static void Write(string filename, SeqForwarderConfig data)
