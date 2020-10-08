@@ -36,7 +36,7 @@ namespace Seq.Forwarder.Config
             }
         };
 
-        public static SeqForwarderConfig ReadOrInit(string filename)
+        public static SeqForwarderConfig ReadOrInit(string filename, bool includeEnvironmentVariables = true)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
 
@@ -51,19 +51,22 @@ namespace Seq.Forwarder.Config
             var combinedConfig = JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings)
                 ?? throw new ArgumentException("Configuration content is null.");
 
-            // Any Environment Variables overwrite those in the Config File
-            var envVarConfig = new ConfigurationBuilder().AddEnvironmentVariables("FORWARDER_").Build();
-            foreach (var sectionProperty in typeof(SeqForwarderConfig).GetTypeInfo().DeclaredProperties
-                .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic))
+            if (includeEnvironmentVariables)
             {
-                foreach (var subGroupProperty in sectionProperty.PropertyType.GetTypeInfo().DeclaredProperties
-                    .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null && p.SetMethod.IsPublic && !p.GetMethod.IsStatic))
+                // Any Environment Variables overwrite those in the Config File
+                var envVarConfig = new ConfigurationBuilder().AddEnvironmentVariables("FORWARDER_").Build();
+                foreach (var sectionProperty in typeof(SeqForwarderConfig).GetTypeInfo().DeclaredProperties
+                    .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic))
                 {
-                    var envVarName = sectionProperty.Name.ToUpper() + "_" + subGroupProperty.Name.ToUpper();
-                    var envVarVal = envVarConfig.GetValue(subGroupProperty.PropertyType, envVarName);
-                    if (envVarVal != null)
+                    foreach (var subGroupProperty in sectionProperty.PropertyType.GetTypeInfo().DeclaredProperties
+                        .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null && p.SetMethod.IsPublic && !p.GetMethod.IsStatic))
                     {
-                        subGroupProperty.SetValue(sectionProperty.GetValue(combinedConfig), envVarVal);
+                        var envVarName = sectionProperty.Name.ToUpper() + "_" + subGroupProperty.Name.ToUpper();
+                        var envVarVal = envVarConfig.GetValue(subGroupProperty.PropertyType, envVarName);
+                        if (envVarVal != null)
+                        {
+                            subGroupProperty.SetValue(sectionProperty.GetValue(combinedConfig), envVarVal);
+                        }
                     }
                 }
             }
