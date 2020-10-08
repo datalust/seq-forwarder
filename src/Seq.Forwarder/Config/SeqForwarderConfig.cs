@@ -48,7 +48,8 @@ namespace Seq.Forwarder.Config
             }
 
             var content = File.ReadAllText(filename);
-            var seqForwarderConfig = JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings);
+            var combinedConfig = JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings)
+                ?? throw new ArgumentException("Configuration content is null.");
 
             // Any Environment Variables overwrite those in the Config File
             var envVarConfig = new ConfigurationBuilder().AddEnvironmentVariables("FORWARDER_").Build();
@@ -62,14 +63,12 @@ namespace Seq.Forwarder.Config
                     var envVarVal = envVarConfig.GetValue(subGroupProperty.PropertyType, envVarName);
                     if (envVarVal != null)
                     {
-                        seqForwarderConfig ??= new SeqForwarderConfig();
-                        subGroupProperty.SetValue(sectionProperty.GetValue(seqForwarderConfig), envVarVal);
+                        subGroupProperty.SetValue(sectionProperty.GetValue(combinedConfig), envVarVal);
                     }
                 }
             }
 
-            return seqForwarderConfig ?? 
-                   throw new ArgumentException("Configuration content is null.");
+            return combinedConfig;
         }
 
         public static void Write(string filename, SeqForwarderConfig data)
