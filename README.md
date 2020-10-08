@@ -86,7 +86,7 @@ If you need to inspect the current configuration, it can be found at: `%PROGRAMD
 ## Command line usage
 
 ```
->seqfwd help
+> ./seqfwd help
 Usage: seqfwd <command> [<args>]
 
 Available commands are:
