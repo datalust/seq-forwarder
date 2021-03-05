@@ -17,6 +17,7 @@ using System.IO;
 using System.Text;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
+using Seq.Forwarder.Cryptography;
 using Seq.Forwarder.Multiplexing;
 using Serilog;
 
@@ -36,16 +37,14 @@ namespace Seq.Forwarder.Cli.Commands
         {
             try
             {
-                var config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-                using (var buffer = new ActiveLogBufferMap(_storagePath.BufferPath, config.Storage, config.Output, new InertLogShipperFactory()))
+                var config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
+                using var buffer = new ActiveLogBufferMap(_storagePath.BufferPath, config.Storage, config.Output, new InertLogShipperFactory(), StringDataProtector.CreatePlatformDefault());
+                buffer.Load();
+                buffer.Enumerate((k, v) =>
                 {
-                    buffer.Load();
-                    buffer.Enumerate((k, v) =>
-                    {
-                        var s = Encoding.UTF8.GetString(v);
-                        Console.WriteLine(s);
-                    });
-                }
+                    var s = Encoding.UTF8.GetString(v);
+                    Console.WriteLine(s);
+                });
                 return 0;
             }
             catch (Exception ex)

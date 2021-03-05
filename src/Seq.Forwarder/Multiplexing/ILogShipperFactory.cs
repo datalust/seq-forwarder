@@ -17,8 +17,8 @@ using Seq.Forwarder.Storage;
 
 namespace Seq.Forwarder.Multiplexing
 {
-    interface ILogShipperFactory
+    public interface ILogShipperFactory
     {
-        LogShipper Create(LogBuffer logBuffer, string apiKey);
+        LogShipper Create(LogBuffer logBuffer, string? apiKey);
     }
 }

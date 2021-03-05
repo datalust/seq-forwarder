@@ -42,8 +42,7 @@ namespace Seq.Forwarder.Diagnostics
 
             while (_queue.Count > _queueLength)
             {
-                LogEvent dropped;
-                _queue.TryDequeue(out dropped);
+                _queue.TryDequeue(out _);
             }
         }
     }

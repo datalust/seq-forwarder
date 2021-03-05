@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if WINDOWS
+
 using System;
-using System.Collections.Generic;
-using System.Configuration.Install;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.ServiceProcess;
-using Nancy.Hosting.Self;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.ServiceProcess;
 using Seq.Forwarder.Util;
-using Serilog.Events;
+
+// ReSharper disable once ClassNeverInstantiated.Global
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -40,14 +40,16 @@ namespace Seq.Forwarder.Cli.Commands
         public InstallCommand()
         {
             _storagePath = Enable<StoragePathFeature>();
-            _serviceCredentials = Enable<ServiceCredentialsFeature>();
             _listenUri = Enable<ListenUriFeature>();
+            _serviceCredentials = Enable<ServiceCredentialsFeature>();
 
             Options.Add(
                 "setup",
-                "Install the service or reconfigure the binary location, then start the service",
+                "Install and start the service only if it does not exist; otherwise reconfigure the binary location",
                 v => _setup = true);
         }
+
+        string ServiceUsername => _serviceCredentials.IsUsernameSpecified ? _serviceCredentials.Username : "NT AUTHORITY\\LocalService";
 
         protected override int Run(TextWriter cout)
         {
@@ -63,27 +65,23 @@ namespace Seq.Forwarder.Cli.Commands
                 if (exit == 0)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    cout.WriteLine("Setup completed successfully.");
+                    Console.WriteLine("Setup completed successfully.");
                     Console.ResetColor();
                 }
                 return exit;
             }
             catch (DirectoryNotFoundException dex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
                 cout.WriteLine("Could not install the service, directory not found: " + dex.Message);
-                Console.ResetColor();
                 return -1;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
                 cout.WriteLine("Could not install the service: " + ex.Message);
-                Console.ResetColor();
                 return -1;
             }
         }
-
+        
         int Setup(TextWriter cout)
         {
             ServiceController controller;
@@ -101,7 +99,7 @@ namespace Seq.Forwarder.Cli.Commands
                 return Start(controller2, cout);
             }
 
-            cout.WriteLine("Service is installed; checking path info...");
+            cout.WriteLine("Service is installed; checking path and dependency configuration...");
             Reconfigure(controller, cout);
 
             if (controller.Status != ServiceControllerStatus.Running)
@@ -112,14 +110,18 @@ namespace Seq.Forwarder.Cli.Commands
 
         static void Reconfigure(ServiceController controller, TextWriter cout)
         {
-            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out string path))
+            var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
+            if (0 != CaptiveProcess.Run(sc, "config \"" + controller.ServiceName + "\" depend= Winmgmt/Tcpip/CryptSvc", cout.WriteLine, cout.WriteLine))
+                cout.WriteLine("Could not reconfigure service dependencies; ignoring.");
+
+            if (!ServiceConfiguration.GetServiceBinaryPath(controller, cout, out var path))
                 return;
 
-            var current = "\"" + typeof(Program).Assembly.Location + "\"";
+            var current = "\"" + Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, Program.BinaryName) + "\"";
             if (path.StartsWith(current))
                 return;
 
-            var seqRun = path.IndexOf("seq-forwarder.exe\" run", StringComparison.OrdinalIgnoreCase);
+            var seqRun = path.IndexOf(Program.BinaryName + "\" run", StringComparison.OrdinalIgnoreCase);
             if (seqRun == -1)
             {
                 cout.WriteLine("Current binary path is an unrecognized format.");
@@ -128,12 +130,11 @@ namespace Seq.Forwarder.Cli.Commands
 
             cout.WriteLine("Existing service binary path is: {0}", path);
 
-            var trimmed = path.Substring(seqRun + "seq-forwarder.exe ".Length);
+            var trimmed = path.Substring((seqRun + Program.BinaryName + " ").Length);
             var newPath = current + trimmed;
             cout.WriteLine("Updating service binary path configuration to: {0}", newPath);
 
             var escaped = newPath.Replace("\"", "\\\"");
-            var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
             if (0 != CaptiveProcess.Run(sc, "config \"" + controller.ServiceName + "\" binPath= \"" + escaped + "\"", cout.WriteLine, cout.WriteLine))
             {
                 cout.WriteLine("Could not reconfigure service path; ignoring.");
@@ -143,7 +144,7 @@ namespace Seq.Forwarder.Cli.Commands
             cout.WriteLine("Service binary path reconfigured successfully.");
         }
 
-        int Start(ServiceController controller, TextWriter cout)
+        static int Start(ServiceController controller, TextWriter cout)
         {
             controller.Start();
 
@@ -164,81 +165,88 @@ namespace Seq.Forwarder.Cli.Commands
         }
 
         [DllImport("shlwapi.dll")]
-        private static extern bool PathIsNetworkPath(string pszPath);
+        static extern bool PathIsNetworkPath(string pszPath);
 
         void Install(TextWriter cout)
         {
             cout.WriteLine("Installing service...");
 
             if (PathIsNetworkPath(_storagePath.StorageRootPath))
-                throw new ArgumentException("Seq Forwarder requires a local (or SAN) storage location; network shares are not supported.");
+                throw new ArgumentException("Seq requires a local (or SAN) storage location; network shares are not supported.");
 
-            SeqForwarderConfig config;
-            if (File.Exists(_storagePath.ConfigFilePath))
-            {
-                cout.WriteLine($"Using the configuration found in {_storagePath.ConfigFilePath}...");
-                config = SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-            }
-            else
-            {
-                cout.WriteLine($"Creating a new configuration file in {_storagePath.ConfigFilePath}...");
-                config = CreateDefaultConfig(_storagePath);
-            }
-
+            cout.WriteLine($"Updating the configuration in {_storagePath.ConfigFilePath}...");
+            var config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
+            
             if (!string.IsNullOrEmpty(_listenUri.ListenUri))
             {
                 config.Api.ListenUri = _listenUri.ListenUri;
                 SeqForwarderConfig.Write(_storagePath.ConfigFilePath, config);
             }
 
-            var args = new List<string>
-            {
-                "/LogFile=\"\"",
-                "/ShowCallStack",
-                "/storage=\"" + _storagePath.StorageRootPath + "\"",
-                GetType().Assembly.Location
-            };
-
             if (_serviceCredentials.IsUsernameSpecified)
             {
                 if (!_serviceCredentials.IsPasswordSpecified)
-                    throw new ArgumentException("If a service user account is specified, a password for the account must also be specified.");
+                    throw new ArgumentException(
+                        "If a service user account is specified, a password for the account must also be specified.");
 
                 // https://technet.microsoft.com/en-us/library/cc794944(v=ws.10).aspx
                 cout.WriteLine($"Ensuring {_serviceCredentials.Username} is granted 'Log on as a Service' rights...");
                 AccountRightsHelper.EnsureServiceLogOnRights(_serviceCredentials.Username);
-
-                cout.WriteLine($"Granting {_serviceCredentials.Username} rights to {_storagePath.StorageRootPath}...");
-                GiveFullControl(_storagePath.StorageRootPath, _serviceCredentials.Username);
-
-                cout.WriteLine($"Granting {_serviceCredentials.Username} rights to {config.Diagnostics.InternalLogPath}...");
-                GiveFullControl(config.Diagnostics.InternalLogPath, _serviceCredentials.Username);
-
-                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
-                cout.WriteLine($"Adding URL reservation at {listenUri} for {_serviceCredentials.Username} (may request UAC elevation)...");
-                NetSh.AddUrlAcl(listenUri, _serviceCredentials.Username);
-
-                args.Insert(0, "/username=\"" + _serviceCredentials.Username + "\"");
-                args.Insert(0, "/password=\"" + _serviceCredentials.Password + "\"");
             }
-            else
+
+            cout.WriteLine($"Granting {ServiceUsername} rights to {_storagePath.StorageRootPath}...");
+            GiveFullControl(_storagePath.StorageRootPath);
+
+            cout.WriteLine($"Granting {ServiceUsername} rights to {config.Diagnostics.InternalLogPath}...");
+            GiveFullControl(config.Diagnostics.InternalLogPath);
+
+            var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
+            cout.WriteLine($"Adding URL reservation at {listenUri} for {ServiceUsername}...");
+            var netshResult = CaptiveProcess.Run("netsh", $"http add urlacl url={listenUri} user=\"{ServiceUsername}\"", cout.WriteLine, cout.WriteLine);
+            if (netshResult != 0)
+                cout.WriteLine($"Could not add URL reservation for {listenUri}: `netsh` returned {netshResult}; ignoring");
+
+            var exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, Program.BinaryName);
+            var forwarderRunCmdline = $"\"{exePath}\" run --storage=\"{_storagePath.StorageRootPath}\"";
+
+            var binPath = forwarderRunCmdline.Replace("\"", "\\\"");
+
+            var scCmdline = "create \"" + SeqForwarderWindowsService.WindowsServiceName + "\"" +
+                            " binPath= \"" + binPath + "\"" +
+                            " start= auto" +
+                            " depend= Winmgmt/Tcpip/CryptSvc";
+
+            if (_serviceCredentials.IsUsernameSpecified)
+                scCmdline += $" obj= {_serviceCredentials.Username} password= {_serviceCredentials.Password}";
+
+            var sc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "sc.exe");
+            if (0 != CaptiveProcess.Run(sc, scCmdline, cout.WriteLine, cout.WriteLine))
             {
-                cout.WriteLine($"Granting the NT AUTHORITY\\LocalService account rights to {_storagePath.StorageRootPath}...");
-                GiveFullControl(_storagePath.StorageRootPath, "NT AUTHORITY\\LocalService");
-
-                cout.WriteLine($"Granting NT AUTHORITY\\LocalService account rights to {config.Diagnostics.InternalLogPath}...");
-                GiveFullControl(config.Diagnostics.InternalLogPath, "NT AUTHORITY\\LocalService");
-
-                var listenUri = MakeListenUriReservationPattern(config.Api.ListenUri);
-                cout.WriteLine($"Adding URL reservation at {listenUri} for the Local Service account (may request UAC elevation)...");
-                NetSh.AddUrlAcl(listenUri, "NT AUTHORITY\\LocalService");
+                throw new ArgumentException("Service setup failed");
             }
 
-            ManagedInstallerClass.InstallHelper(args.ToArray());
+            cout.WriteLine("Setting service restart policy...");
+            if (0 != CaptiveProcess.Run(sc, $"failure \"{SeqForwarderWindowsService.WindowsServiceName}\" actions= restart/60000/restart/60000/restart/60000// reset= 600000", cout.WriteLine, cout.WriteLine))
+                cout.WriteLine("Could not set service restart policy; ignoring");
+            cout.WriteLine("Setting service description...");
+            if (0 != CaptiveProcess.Run(sc, $"description \"{SeqForwarderWindowsService.WindowsServiceName}\" \"Durable storage and forwarding of application log events\"", cout.WriteLine, cout.WriteLine))
+                cout.WriteLine("Could not set service description; ignoring");
 
-            Console.ForegroundColor = ConsoleColor.Green;
             cout.WriteLine("Service installed successfully.");
-            Console.ResetColor();
+        }
+
+        void GiveFullControl(string target)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+
+            if (!Directory.Exists(target))
+                Directory.CreateDirectory(target);
+
+            var storageInfo = new DirectoryInfo(target);
+            var storageAccessControl = storageInfo.GetAccessControl();
+            storageAccessControl.AddAccessRule(new FileSystemAccessRule(ServiceUsername,
+                FileSystemRights.FullControl, AccessControlType.Allow));
+            storageInfo.SetAccessControl(storageAccessControl);
         }
 
         static string MakeListenUriReservationPattern(string uri)
@@ -248,30 +256,7 @@ namespace Seq.Forwarder.Cli.Commands
                 listenUri += "/";
             return listenUri;
         }
-
-        static void GiveFullControl(string target, string username)
-        {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-
-            if (!Directory.Exists(target))
-                Directory.CreateDirectory(target);
-
-            var storageInfo = new DirectoryInfo(target);
-            var storageAccessControl = storageInfo.GetAccessControl();
-            storageAccessControl.AddAccessRule(new FileSystemAccessRule(username,
-                FileSystemRights.FullControl, AccessControlType.Allow));
-            storageInfo.SetAccessControl(storageAccessControl);
-        }
-
-        public static SeqForwarderConfig CreateDefaultConfig(StoragePathFeature storagePath)
-        {
-            if (!Directory.Exists(storagePath.StorageRootPath))
-                Directory.CreateDirectory(storagePath.StorageRootPath);
-
-            var config = new SeqForwarderConfig();
-            SeqForwarderConfig.Write(storagePath.ConfigFilePath, config);
-
-            return config;
-        }
     }
 }
+
+#endif

@@ -33,7 +33,7 @@ namespace Seq.Forwarder.Cli
         public int Run(string[] args, TextWriter cout, TextWriter cerr)
         {
             var ea = Assembly.GetEntryAssembly();
-            var name = ea.GetName().Name;
+            var name = ea!.GetName().Name;
 
             if (args.Length > 0)
             {

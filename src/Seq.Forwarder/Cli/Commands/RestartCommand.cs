@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if WINDOWS
+
 using System;
 using System.IO;
 using System.ServiceProcess;
 using Seq.Forwarder.ServiceProcess;
+
+// ReSharper disable UnusedType.Global
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -27,6 +31,7 @@ namespace Seq.Forwarder.Cli.Commands
             try
             {
                 var controller = new ServiceController(SeqForwarderWindowsService.WindowsServiceName);
+
                 if (controller.Status != ServiceControllerStatus.Stopped)
                 {
                     cout.WriteLine("Stopping {0}...", controller.ServiceName);
@@ -74,3 +79,5 @@ namespace Seq.Forwarder.Cli.Commands
         }
     }
 }
+
+#endif

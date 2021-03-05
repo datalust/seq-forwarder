@@ -14,15 +14,20 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace Seq.Forwarder.Config
 {
     class SeqForwarderConfig
     {
-        public static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
+        static JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver(),
             Converters =
@@ -31,17 +36,53 @@ namespace Seq.Forwarder.Config
             }
         };
 
-        public static SeqForwarderConfig Read(string filename)
+        public static SeqForwarderConfig ReadOrInit(string filename, bool includeEnvironmentVariables = true)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(filename))
+            {
+                var config = new SeqForwarderConfig();
+                Write(filename, config);
+                return config;
+            }
+
             var content = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings);
+            var combinedConfig = JsonConvert.DeserializeObject<SeqForwarderConfig>(content, SerializerSettings)
+                ?? throw new ArgumentException("Configuration content is null.");
+
+            if (includeEnvironmentVariables)
+            {
+                // Any Environment Variables overwrite those in the Config File
+                var envVarConfig = new ConfigurationBuilder().AddEnvironmentVariables("FORWARDER_").Build();
+                foreach (var sectionProperty in typeof(SeqForwarderConfig).GetTypeInfo().DeclaredProperties
+                    .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic))
+                {
+                    foreach (var subGroupProperty in sectionProperty.PropertyType.GetTypeInfo().DeclaredProperties
+                        .Where(p => p.GetMethod != null && p.GetMethod.IsPublic && p.SetMethod != null && p.SetMethod.IsPublic && !p.GetMethod.IsStatic))
+                    {
+                        var envVarName = sectionProperty.Name.ToUpper() + "_" + subGroupProperty.Name.ToUpper();
+                        var envVarVal = envVarConfig.GetValue(subGroupProperty.PropertyType, envVarName);
+                        if (envVarVal != null)
+                        {
+                            subGroupProperty.SetValue(sectionProperty.GetValue(combinedConfig), envVarVal);
+                        }
+                    }
+                }
+            }
+
+            return combinedConfig;
         }
 
         public static void Write(string filename, SeqForwarderConfig data)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
             if (data == null) throw new ArgumentNullException(nameof(data));
+
+            var dir = Path.GetDirectoryName(filename);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            
             var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
             File.WriteAllText(filename, content);
         }

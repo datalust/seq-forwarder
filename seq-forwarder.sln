@@ -5,38 +5,23 @@ VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{61556DAE-6B5F-472B-AA8F-6E36E6B1376D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{FA5BD652-A32B-4D01-B882-326F0315BD40}"
-	ProjectSection(SolutionItems) = preProject
-		asset\ForwarderLicense.rtf = asset\ForwarderLicense.rtf
-		LICENSE = LICENSE
-		README.md = README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{1F622339-3A47-4350-8291-AD6834E025E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Forwarder", "src\Seq.Forwarder\Seq.Forwarder.csproj", "{206FCC39-00A9-4C3D-998F-E0D3538E4786}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seq.Forwarder.Tests", "test\Seq.Forwarder.Tests\Seq.Forwarder.Tests.csproj", "{88984363-1BD7-4E60-99B9-7D07666990B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seq.Forwarder.Administration", "src\Seq.Forwarder.Administration\Seq.Forwarder.Administration.csproj", "{D9FB0CF3-65D4-4FDC-A43D-39F795D89371}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{AF47E806-56BD-4431-95EC-4DF3CB26A8DA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{AF47E806-56BD-4431-95EC-4DF3CB26A8DA}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{CAE68175-E3AF-4120-BE76-C0EA9B024375}"
 	ProjectSection(SolutionItems) = preProject
 		data\test_42000_is_corrupt.json = data\test_42000_is_corrupt.json
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "setup", "setup", "{812B5158-0B57-4157-81CD-6626C515185E}"
-EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SeqForwarder", "setup\SeqForwarder\SeqForwarder.wixproj", "{F3A1944B-FF13-4250-A7F1-581CBB99A9BF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{206FCC39-00A9-4C3D-998F-E0D3538E4786} = {206FCC39-00A9-4C3D-998F-E0D3538E4786}
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371} = {D9FB0CF3-65D4-4FDC-A43D-39F795D89371}
 	EndProjectSection
 EndProject
 Global
@@ -53,14 +38,6 @@ Global
 		{88984363-1BD7-4E60-99B9-7D07666990B8}.Debug|x64.Build.0 = Debug|x64
 		{88984363-1BD7-4E60-99B9-7D07666990B8}.Release|x64.ActiveCfg = Release|x64
 		{88984363-1BD7-4E60-99B9-7D07666990B8}.Release|x64.Build.0 = Release|x64
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371}.Debug|x64.ActiveCfg = Debug|x64
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371}.Debug|x64.Build.0 = Debug|x64
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371}.Release|x64.ActiveCfg = Release|x64
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371}.Release|x64.Build.0 = Release|x64
-		{F3A1944B-FF13-4250-A7F1-581CBB99A9BF}.Debug|x64.ActiveCfg = Debug|x64
-		{F3A1944B-FF13-4250-A7F1-581CBB99A9BF}.Debug|x64.Build.0 = Debug|x64
-		{F3A1944B-FF13-4250-A7F1-581CBB99A9BF}.Release|x64.ActiveCfg = Release|x64
-		{F3A1944B-FF13-4250-A7F1-581CBB99A9BF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,8 +45,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{206FCC39-00A9-4C3D-998F-E0D3538E4786} = {61556DAE-6B5F-472B-AA8F-6E36E6B1376D}
 		{88984363-1BD7-4E60-99B9-7D07666990B8} = {1F622339-3A47-4350-8291-AD6834E025E1}
-		{D9FB0CF3-65D4-4FDC-A43D-39F795D89371} = {61556DAE-6B5F-472B-AA8F-6E36E6B1376D}
-		{F3A1944B-FF13-4250-A7F1-581CBB99A9BF} = {812B5158-0B57-4157-81CD-6626C515185E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD7CD612-EA40-4853-8CB6-E4E931FC4A5C}

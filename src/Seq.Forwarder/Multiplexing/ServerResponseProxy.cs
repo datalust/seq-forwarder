@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace Seq.Forwarder.Multiplexing
 {
-    class ServerResponseProxy
+    public class ServerResponseProxy
     {
         const string EmptyResponse = "{}";
 
@@ -24,7 +24,7 @@ namespace Seq.Forwarder.Multiplexing
         readonly Dictionary<string, string> _lastResponseByApiKey = new Dictionary<string, string>();
         string _lastNoApiKeyResponse = EmptyResponse;
 
-        public void SuccessResponseReturned(string apiKey, string response)
+        public void SuccessResponseReturned(string? apiKey, string response)
         {
             lock (_syncRoot)
             {
@@ -35,7 +35,7 @@ namespace Seq.Forwarder.Multiplexing
             }
         }
 
-        public string GetResponseText(string apiKey)
+        public string GetResponseText(string? apiKey)
         {
             lock (_syncRoot)
             {

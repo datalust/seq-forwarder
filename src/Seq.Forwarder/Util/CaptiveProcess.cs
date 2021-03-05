@@ -18,20 +18,20 @@ using System.Threading;
 
 namespace Seq.Forwarder.Util
 {
-    public class CaptiveProcess
+    public static class CaptiveProcess
     {
         public static int Run(
             string fullExePath,
-            string args = null,
-            Action<string> writeStdout = null,
-            Action<string> writeStderr = null, 
-            string workingDirectory = null)
+            string? args = null,
+            Action<string>? writeStdout = null,
+            Action<string>? writeStderr = null, 
+            string? workingDirectory = null)
         {
             if (fullExePath == null) throw new ArgumentNullException(nameof(fullExePath));
 
-            args = args ?? "";
-            writeStdout = writeStdout ?? delegate { };
-            writeStderr = writeStderr ?? delegate { };
+            args ??= "";
+            writeStdout ??= delegate { };
+            writeStderr ??= delegate { };
 
             var startInfo = new ProcessStartInfo
                                 {
@@ -48,37 +48,35 @@ namespace Seq.Forwarder.Util
             if (!string.IsNullOrEmpty(workingDirectory))
                 startInfo.WorkingDirectory = workingDirectory;
 
-            using (var process = Process.Start(startInfo))
-            using (var outputComplete = new ManualResetEvent(false))
-            using (var errorComplete = new ManualResetEvent(false))
+            using var process = Process.Start(startInfo);
+            using var outputComplete = new ManualResetEvent(false);
+            using var errorComplete = new ManualResetEvent(false);
+            // ReSharper disable AccessToDisposedClosure
+
+            process.OutputDataReceived += (o, e) =>
             {
-                // ReSharper disable AccessToDisposedClosure
+                if (e.Data == null)
+                    outputComplete.Set(); 
+                else
+                    writeStdout(e.Data);
+            };
+            process.BeginOutputReadLine();
 
-                process.OutputDataReceived += (o, e) =>
-                {
-                    if (e.Data == null)
-                        outputComplete.Set(); 
-                    else
-                        writeStdout(e.Data);
-                };
-                process.BeginOutputReadLine();
+            process.ErrorDataReceived += (o, e) =>
+            {
+                if (e.Data == null)
+                    errorComplete.Set();
+                else
+                    writeStderr(e.Data);
+            };
+            process.BeginErrorReadLine();
 
-                process.ErrorDataReceived += (o, e) =>
-                {
-                    if (e.Data == null)
-                        errorComplete.Set();
-                    else
-                        writeStderr(e.Data);
-                };
-                process.BeginErrorReadLine();
+            process.WaitForExit();
 
-                process.WaitForExit();
+            outputComplete.WaitOne();
+            errorComplete.WaitOne();
 
-                outputComplete.WaitOne();
-                errorComplete.WaitOne();
-
-                return process.ExitCode;
-            }
+            return process.ExitCode;
         }
     }
 }

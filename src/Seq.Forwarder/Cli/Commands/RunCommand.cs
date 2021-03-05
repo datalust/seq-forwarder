@@ -15,13 +15,19 @@
 using Autofac;
 using Seq.Forwarder.Cli.Features;
 using Seq.Forwarder.Config;
-using Seq.Forwarder.ServiceProcess;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using System;
 using System.IO;
-using System.ServiceProcess;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Seq.Forwarder.Util;
+using Seq.Forwarder.Web.Host;
+using Serilog.Core;
+
+// ReSharper disable UnusedType.Global
 
 namespace Seq.Forwarder.Cli.Commands
 {
@@ -31,11 +37,11 @@ namespace Seq.Forwarder.Cli.Commands
         readonly StoragePathFeature _storagePath;
         readonly ListenUriFeature _listenUri;
 
-        bool _nologo;
+        bool _noLogo;
 
         public RunCommand()
         {
-            Options.Add("nologo", v => _nologo = true);
+            Options.Add("nologo", v => _noLogo = true);
             _storagePath = Enable<StoragePathFeature>();
             _listenUri = Enable<ListenUriFeature>();
         }
@@ -44,7 +50,7 @@ namespace Seq.Forwarder.Cli.Commands
         {
             if (Environment.UserInteractive)
             {
-                if (!_nologo)
+                if (!_noLogo)
                 {
                     WriteBanner();
                     cout.WriteLine();
@@ -58,92 +64,122 @@ namespace Seq.Forwarder.Cli.Commands
 
             try
             {
-                config = LoadOrCreateConfig();
+                config = SeqForwarderConfig.ReadOrInit(_storagePath.ConfigFilePath);
             }
             catch (Exception ex)
             {
-                var logger = CreateLogger(
+                using var logger = CreateLogger(
                     LogEventLevel.Information,
                     SeqForwarderDiagnosticConfig.GetDefaultInternalLogPath());
 
                 logger.Fatal(ex, "Failed to load configuration from {ConfigFilePath}", _storagePath.ConfigFilePath);
-                (logger as IDisposable)?.Dispose();
                 return 1;
             }
 
-            Log.Logger = CreateLogger(config.Diagnostics.InternalLoggingLevel, config.Diagnostics.InternalLogPath);
+            Log.Logger = CreateLogger(
+                config.Diagnostics.InternalLoggingLevel,
+                config.Diagnostics.InternalLogPath,
+                config.Diagnostics.InternalLogServerUri,
+                config.Diagnostics.InternalLogServerApiKey);
 
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, _listenUri.ListenUri ?? config.Api.ListenUri, config));
+            var listenUri = _listenUri.ListenUri ?? config.Api.ListenUri;
 
-            var container = builder.Build();
-            var exit = Environment.UserInteractive
-                ? RunInteractive(container, cout)
-                : RunService(container);
+            try
+            {
+                ILifetimeScope? container = null;
+                using var host = new HostBuilder()
+                    .UseSerilog()
+                    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                    .ConfigureContainer<ContainerBuilder>(builder =>
+                    {
+                        builder.RegisterBuildCallback(ls => container = ls);
+                        builder.RegisterModule(new SeqForwarderModule(_storagePath.BufferPath, config));
+                    })
+                    .ConfigureWebHostDefaults(web =>
+                    {
+                        web.UseUrls(listenUri);
+                        web.UseStartup<Startup>();
+                    })
+                    .Build();
 
-            Log.CloseAndFlush();
-            return exit;
+                if (container == null) throw new Exception("Host did not build container.");
+                
+                var service = container.Resolve<ServerService>(
+                    new TypedParameter(typeof(IHost), host),
+                    new NamedParameter("listenUri", listenUri));
+                
+                var exit = ExecutionEnvironment.SupportsStandardIO
+                    ? RunStandardIO(service, cout)
+                    : RunService(service);
+
+                return exit;
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Unhandled exception");
+                return -1;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
-        ILogger CreateLogger(LogEventLevel internalLoggingLevel, string internalLogPath)
+        static Logger CreateLogger(
+            LogEventLevel internalLoggingLevel,
+            string internalLogPath,
+            string? internalLogServerUri = null,
+            string? internalLogServerApiKey = null)
         {
             var loggerConfiguration = new LoggerConfiguration()
                 .Enrich.FromLogContext()
+                .Enrich.WithProperty("MachineName", Environment.MachineName)
+                .Enrich.WithProperty("Application", "Seq Forwarder")
                 .MinimumLevel.Is(internalLoggingLevel)
-                .WriteTo.RollingFile(
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .WriteTo.File(
                     new RenderedCompactJsonFormatter(),
                     GetRollingLogFilePathFormat(internalLogPath),
+                    rollingInterval: RollingInterval.Day,
                     fileSizeLimitBytes: 1024 * 1024);
 
             if (Environment.UserInteractive)
                 loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
+            if (!string.IsNullOrWhiteSpace(internalLogServerUri))
+                loggerConfiguration.WriteTo.Seq(
+                    internalLogServerUri,
+                    apiKey: internalLogServerApiKey,
+                    compact: true);
+
             return loggerConfiguration.CreateLogger();
         }
 
-        // Re-create just in case it was inadvertently deleted.
-        SeqForwarderConfig LoadOrCreateConfig()
-        {
-            if (File.Exists(_storagePath.ConfigFilePath))
-            {
-                return SeqForwarderConfig.Read(_storagePath.ConfigFilePath);
-            }
-
-            return InstallCommand.CreateDefaultConfig(_storagePath);
-        }
-
-        string GetRollingLogFilePathFormat(string internalLogPath)
+        static string GetRollingLogFilePathFormat(string internalLogPath)
         {
             if (internalLogPath == null) throw new ArgumentNullException(nameof(internalLogPath));
 
-            return Path.Combine(internalLogPath, "seq-forwarder-{Date}.log");
+            return Path.Combine(internalLogPath, "seq-forwarder-.log");
         }
 
-        int RunService(IContainer container)
+        static int RunService(ServerService service)
         {
-            try
-            {
-                ServiceBase.Run(new ServiceBase[] {
-                    new SeqForwarderWindowsService(container.Resolve<ServerService>(),
-                        container)
-                });
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Failed to construct service");
-                throw;
-            }
+#if WINDOWS
+            System.ServiceProcess.ServiceBase.Run(new System.ServiceProcess.ServiceBase[] {
+                new Seq.Forwarder.ServiceProcess.SeqForwarderWindowsService(service)
+            });
+            return 0;
+#else
+            throw new NotSupportedException("Windows services are not supported on this platform.");            
+#endif
         }
-
-        int RunInteractive(IContainer container, TextWriter cout)
+        
+        static int RunStandardIO(ServerService service, TextWriter cout)
         {
-            var service = container.Resolve<ServerService>();
+            service.Start();
 
             try
             {
-                service.Start();
-
                 Console.TreatControlCAsInput = true;
                 var k = Console.ReadKey(true);
                 while (k.Key != ConsoleKey.C || !k.Modifiers.HasFlag(ConsoleModifiers.Control))
@@ -151,19 +187,16 @@ namespace Seq.Forwarder.Cli.Commands
 
                 cout.WriteLine("Ctrl+C pressed; stopping...");
                 Console.TreatControlCAsInput = false;
-
-                service.Stop();
-
-                return 0;
             }
-            catch
+            catch (Exception ex)
             {
-                return -1;
+                Log.Debug(ex, "Console not attached, waiting for any input");
+                Console.Read();
             }
-            finally
-            {
-                container.Dispose();
-            }
+
+            service.Stop();
+
+            return 0;
         }
 
         static void WriteBanner()
@@ -172,7 +205,7 @@ namespace Seq.Forwarder.Cli.Commands
             Console.WriteLine();
             Write(" Seq Forwarder", ConsoleColor.White);
             Write(" ──", ConsoleColor.DarkGray);
-            Write(" © 2019 Datalust Pty Ltd", ConsoleColor.Gray);
+            Write(" © 2020 Datalust Pty Ltd", ConsoleColor.Gray);
             Console.WriteLine();
             Write("─", ConsoleColor.DarkGray, 47);
             Console.WriteLine();
