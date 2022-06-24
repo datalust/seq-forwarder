@@ -122,7 +122,7 @@ namespace Seq.Forwarder.Schema
                 if (withFormat.Count() == renderingsArray.Count)
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
-                    Dictionary<string, Dictionary<string, string>>? renderingsByProperty = withFormat
+                    var renderingsByProperty = withFormat
                         .Zip(renderingsArray, (p, j) => new { p.PropertyName, p.Format, Rendering = j.Value<string>() })
                         .GroupBy(p => p.PropertyName)
                         .ToDictionary(g => g.Key, g => g.ToDictionaryDistinct(p => p.Format, p => p.Rendering));
@@ -152,7 +152,7 @@ namespace Seq.Forwarder.Schema
             {
                 if (eventTypeToken.Type == JTokenType.Integer)
                 {
-                    result.Add("EventType", uint.Parse(eventTypeToken.Value<string>()));
+                    result.Add("EventType", uint.Parse(eventTypeToken.Value<string>()!));
                 }
                 else if (eventTypeToken.Type == JTokenType.String)
                 {
