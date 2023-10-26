@@ -45,14 +45,20 @@ namespace Seq.Forwarder
 
             builder.Register(c =>
             {
-                var baseUri = c.Resolve<SeqForwarderOutputConfig>().ServerUrl;
+                var outputConfig = c.Resolve<SeqForwarderOutputConfig>();
+                var baseUri = outputConfig.ServerUrl;
                 if (string.IsNullOrWhiteSpace(baseUri))
                     throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
 
                 if (!baseUri.EndsWith("/"))
                     baseUri += "/";
 
-                return new HttpClient { BaseAddress = new Uri(baseUri) };
+                var httpMessageHandler = new SocketsHttpHandler()
+                {
+                    PooledConnectionLifetime = outputConfig.PooledConnectionLifetime
+                };
+
+                return new HttpClient(httpMessageHandler) { BaseAddress = new Uri(baseUri) };
             }).SingleInstance();
 
             builder.RegisterInstance(StringDataProtector.CreatePlatformDefault());

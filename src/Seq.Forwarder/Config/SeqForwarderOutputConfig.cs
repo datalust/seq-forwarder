@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Newtonsoft.Json;
 using Seq.Forwarder.Cryptography;
 
@@ -24,6 +25,7 @@ namespace Seq.Forwarder.Config
         public string ServerUrl { get; set; } = "http://localhost:5341";
         public ulong EventBodyLimitBytes { get; set; } = 256 * 1024;
         public ulong RawPayloadLimitBytes { get; set; } = 10 * 1024 * 1024;
+        public TimeSpan PooledConnectionLifetime { get; set; } = TimeSpan.FromMinutes(2);
 
         const string ProtectedDataPrefix = "pd.";
 
