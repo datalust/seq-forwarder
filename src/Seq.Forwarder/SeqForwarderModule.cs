@@ -14,6 +14,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading;
 using Autofac;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Cryptography;
@@ -53,12 +54,24 @@ namespace Seq.Forwarder
                 if (!baseUri.EndsWith("/"))
                     baseUri += "/";
 
-                var httpMessageHandler = new SocketsHttpHandler()
-                {
-                    PooledConnectionLifetime = outputConfig.PooledConnectionLifetime
-                };
+                // additional configuration options that require the use of SocketsHttpHandler should be added to
+                // this expression, using an "or" operator.
 
-                return new HttpClient(httpMessageHandler) { BaseAddress = new Uri(baseUri) };
+                var hasSocketHandlerOption =
+                    ((outputConfig.PooledConnectionLifetime.HasValue) && (outputConfig.PooledConnectionLifetime.Value >= TimeSpan.Zero));
+
+                if (hasSocketHandlerOption)
+                {
+                    var httpMessageHandler = new SocketsHttpHandler()
+                    {
+                        PooledConnectionLifetime = outputConfig.PooledConnectionLifetime ?? Timeout.InfiniteTimeSpan,
+                    };
+
+                    return new HttpClient(httpMessageHandler) { BaseAddress = new Uri(baseUri) };
+                }
+
+                return new HttpClient() { BaseAddress = new Uri(baseUri) };
+
             }).SingleInstance();
 
             builder.RegisterInstance(StringDataProtector.CreatePlatformDefault());
