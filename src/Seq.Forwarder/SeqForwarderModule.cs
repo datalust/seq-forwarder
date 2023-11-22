@@ -58,13 +58,13 @@ namespace Seq.Forwarder
                 // this expression, using an "or" operator.
 
                 var hasSocketHandlerOption =
-                    ((outputConfig.PooledConnectionLifetime.HasValue) && (outputConfig.PooledConnectionLifetime.Value >= TimeSpan.Zero));
+                    (outputConfig.PooledConnectionLifetimeMilliseconds.HasValue);
 
                 if (hasSocketHandlerOption)
                 {
                     var httpMessageHandler = new SocketsHttpHandler()
                     {
-                        PooledConnectionLifetime = outputConfig.PooledConnectionLifetime ?? Timeout.InfiniteTimeSpan,
+                        PooledConnectionLifetime = (outputConfig.PooledConnectionLifetimeMilliseconds.HasValue) ? TimeSpan.FromMilliseconds(outputConfig.PooledConnectionLifetimeMilliseconds.Value) : Timeout.InfiniteTimeSpan,
                     };
 
                     return new HttpClient(httpMessageHandler) { BaseAddress = new Uri(baseUri) };
