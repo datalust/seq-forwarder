@@ -14,6 +14,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading;
 using Autofac;
 using Seq.Forwarder.Config;
 using Seq.Forwarder.Cryptography;
@@ -45,14 +46,32 @@ namespace Seq.Forwarder
 
             builder.Register(c =>
             {
-                var baseUri = c.Resolve<SeqForwarderOutputConfig>().ServerUrl;
+                var outputConfig = c.Resolve<SeqForwarderOutputConfig>();
+                var baseUri = outputConfig.ServerUrl;
                 if (string.IsNullOrWhiteSpace(baseUri))
                     throw new ArgumentException("The destination Seq server URL must be configured in SeqForwarder.json.");
 
                 if (!baseUri.EndsWith("/"))
                     baseUri += "/";
 
-                return new HttpClient { BaseAddress = new Uri(baseUri) };
+                // additional configuration options that require the use of SocketsHttpHandler should be added to
+                // this expression, using an "or" operator.
+
+                var hasSocketHandlerOption =
+                    (outputConfig.PooledConnectionLifetimeMilliseconds.HasValue);
+
+                if (hasSocketHandlerOption)
+                {
+                    var httpMessageHandler = new SocketsHttpHandler()
+                    {
+                        PooledConnectionLifetime = (outputConfig.PooledConnectionLifetimeMilliseconds.HasValue) ? TimeSpan.FromMilliseconds(outputConfig.PooledConnectionLifetimeMilliseconds.Value) : Timeout.InfiniteTimeSpan,
+                    };
+
+                    return new HttpClient(httpMessageHandler) { BaseAddress = new Uri(baseUri) };
+                }
+
+                return new HttpClient() { BaseAddress = new Uri(baseUri) };
+
             }).SingleInstance();
 
             builder.RegisterInstance(StringDataProtector.CreatePlatformDefault());
