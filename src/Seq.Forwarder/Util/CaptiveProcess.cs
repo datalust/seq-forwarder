@@ -48,12 +48,12 @@ namespace Seq.Forwarder.Util
             if (!string.IsNullOrEmpty(workingDirectory))
                 startInfo.WorkingDirectory = workingDirectory;
 
-            using var process = Process.Start(startInfo);
+            using var process = Process.Start(startInfo)!;
             using var outputComplete = new ManualResetEvent(false);
             using var errorComplete = new ManualResetEvent(false);
             // ReSharper disable AccessToDisposedClosure
 
-            process.OutputDataReceived += (o, e) =>
+            process.OutputDataReceived += (_, e) =>
             {
                 if (e.Data == null)
                     outputComplete.Set(); 
@@ -62,7 +62,7 @@ namespace Seq.Forwarder.Util
             };
             process.BeginOutputReadLine();
 
-            process.ErrorDataReceived += (o, e) =>
+            process.ErrorDataReceived += (_, e) =>
             {
                 if (e.Data == null)
                     errorComplete.Set();

@@ -51,7 +51,7 @@ namespace Seq.Forwarder.Web.Api
             _serverResponseProxy = serverResponseProxy;
         }
 
-        IPAddress ClientHostIP => Request.HttpContext.Connection.RemoteIpAddress;
+        IPAddress ClientHostIP => Request.HttpContext.Connection.RemoteIpAddress!;
 
         [HttpGet, Route("api/events/describe")]
         public IActionResult Resources()
@@ -67,7 +67,7 @@ namespace Seq.Forwarder.Web.Api
             if (clef)
                 return await IngestCompactFormat();
 
-            var contentType = (string) Request.Headers[HeaderNames.ContentType];
+            var contentType = (string?) Request.Headers[HeaderNames.ContentType];
             if (contentType != null && contentType.StartsWith(ClefMediaType))
                 return await IngestCompactFormat();
 
@@ -77,7 +77,7 @@ namespace Seq.Forwarder.Web.Api
         IActionResult IngestRawFormat()
         {
             // The compact format ingestion path works with async IO.
-            HttpContext.Features.Get<IHttpBodyControlFeature>().AllowSynchronousIO = true;
+            HttpContext.Features.Get<IHttpBodyControlFeature>()!.AllowSynchronousIO = true;
             
             JObject posted;
             try
@@ -91,8 +91,7 @@ namespace Seq.Forwarder.Web.Api
                 throw new RequestProcessingException("Invalid raw event JSON, body could not be parsed.");
             }
 
-            if (posted == null ||
-                !(posted.TryGetValue("events", StringComparison.Ordinal, out var eventsToken) ||
+            if (!(posted.TryGetValue("events", StringComparison.Ordinal, out var eventsToken) ||
                   posted.TryGetValue("Events", StringComparison.Ordinal, out eventsToken)))
             {
                 IngestionLog.ForClient(ClientHostIP).Debug("Rejecting payload due to invalid JSON structure");
@@ -232,10 +231,10 @@ namespace Seq.Forwarder.Web.Api
             if (parameter.Count != 1)
                 return false;
 
-            var value = (string) parameter;
+            var value = (string?) parameter;
 
             if (value == "" && (
-                Request.QueryString.Value.Contains($"&{queryParameterName}=") ||
+                Request.QueryString.Value!.Contains($"&{queryParameterName}=") ||
                 Request.QueryString.Value.Contains($"?{queryParameterName}=")))
             {
                 return false;

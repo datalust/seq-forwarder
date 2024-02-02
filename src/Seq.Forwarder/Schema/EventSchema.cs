@@ -123,7 +123,7 @@ namespace Seq.Forwarder.Schema
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
                     var renderingsByProperty = withFormat
-                        .Zip(renderingsArray, (p, j) => new { p.PropertyName, p.Format, Rendering = j.Value<string>() })
+                        .Zip(renderingsArray, (p, j) => new { p.PropertyName, Format = p.Format!, Rendering = j.Value<string>() })
                         .GroupBy(p => p.PropertyName)
                         .ToDictionary(g => g.Key, g => g.ToDictionaryDistinct(p => p.Format, p => p.Rendering));
 
