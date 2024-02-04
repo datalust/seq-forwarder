@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -13,7 +13,7 @@
     <Description>Seq HTTP Log Forwarder</Description>
     <Copyright>Copyright © Datalust Pty Ltd and Contributors</Copyright>
     <AssemblyName>seqfwd</AssemblyName>
-    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <Nullable>Enable</Nullable>
   </PropertyGroup>
 
@@ -21,29 +21,29 @@
     <IsWindows>true</IsWindows>
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'linux-x64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`LINUX`))' == 'true')">
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'linux-x64' Or '$(SeqForwarderRid)' == 'linux-arm64' Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`LINUX`))' == 'true')">
     <IsLinux>true</IsLinux>
     <IsUnix>true</IsUnix>
     <DefineConstants>$(DefineConstants);LINUX;UNIX</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'osx-x64'  Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`OSX`))' == 'true')">
+  <PropertyGroup Condition=" '$(SeqForwarderRid)' == 'osx-x64' Or '$(SeqForwarderRid)' == 'osx-arm64'  Or ('$(SeqForwarderRid)' == '' And '$([MSBuild]::IsOsPlatform(`OSX`))' == 'true')">
     <IsMacOS>true</IsMacOS>
     <IsUnix>true</IsUnix>
     <DefineConstants>$(DefineConstants);MACOS;UNIX</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="autofac" Version="5.2.0" />
-    <PackageReference Include="autofac.extensions.dependencyinjection" Version="6.0.0" />
+    <PackageReference Include="autofac" Version="8.0.0" />
+    <PackageReference Include="autofac.extensions.dependencyinjection" Version="9.0.0" />
     <PackageReference Include="lightningdb" Version="0.10.0" />
-    <PackageReference Include="newtonsoft.json" Version="13.0.1" />
-    <PackageReference Include="serilog" Version="2.9.0" />
-    <PackageReference Include="serilog.aspnetcore" Version="3.4.0" />
-    <PackageReference Include="serilog.formatting.compact" Version="1.1.0" />
-    <PackageReference Include="serilog.sinks.console" Version="3.1.1" />
-    <PackageReference Include="serilog.sinks.file" Version="4.1.0" />
-    <PackageReference Include="serilog.sinks.seq" Version="4.0.0" />
-    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
+    <PackageReference Include="newtonsoft.json" Version="13.0.3" />
+    <PackageReference Include="serilog" Version="3.1.1" />
+    <PackageReference Include="serilog.aspnetcore" Version="8.0.1" />
+    <PackageReference Include="serilog.formatting.compact" Version="2.0.0" />
+    <PackageReference Include="serilog.sinks.console" Version="5.0.1" />
+    <PackageReference Include="serilog.sinks.file" Version="5.0.0" />
+    <PackageReference Include="serilog.sinks.seq" Version="6.0.0" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(IsWindows)' == 'true' ">
