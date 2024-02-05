@@ -5,13 +5,13 @@ $framework = 'net8.0'
 function Clean-Output
 {
     Write-Output "Cleaning output"
-	if(Test-Path ./artifacts) { rm ./artifacts -Force -Recurse }
+    if(Test-Path ./artifacts) { rm ./artifacts -Force -Recurse }
 }
 
 function Restore-Packages
 {
     Write-Output "Restoring packages"
-	& dotnet restore
+    & dotnet restore
 }
 
 function Execute-Tests
@@ -24,37 +24,37 @@ function Execute-Tests
 function Create-ArtifactDir
 {
     Write-Output "Creating artifacts directory"
-	mkdir ./artifacts
+    mkdir ./artifacts
 }
 
 function Publish-Archives($version)
 {
-	$rids = @("linux-x64", "osx-x64", "linux-arm64", "osx-arm64", "win-x64")
-	foreach ($rid in $rids) {
+    $rids = @("linux-x64", "osx-x64", "linux-arm64", "osx-arm64", "win-x64")
+    foreach ($rid in $rids) {
         Write-Output "Publishing archive for $rid"
-		
-		& dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
+        
+        & dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
         if($LASTEXITCODE -ne 0) { throw "failed" }
 
-		# Make sure the archive contains a reasonable root filename
-		mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
+        # Make sure the archive contains a reasonable root filename
+        mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
 
-		if ($rid.StartsWith("win-")) {
-			& ./build/7-zip/7za.exe a -tzip ./artifacts/seqfwd-$version-$rid.zip ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
+        if ($rid.StartsWith("win-")) {
+            & ./build/7-zip/7za.exe a -tzip ./artifacts/seqfwd-$version-$rid.zip ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
             if($LASTEXITCODE -ne 0) { throw "failed" }
-		} else {
-			& ./build/7-zip/7za.exe a -ttar seqfwd-$version-$rid.tar ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
-            if($LASTEXITCODE -ne 0) { throw "failed" }
-
-			# Back to the original directory name
-			mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/
-			
-			& ./build/7-zip/7za.exe a -tgzip ./artifacts/seqfwd-$version-$rid.tar.gz seqfwd-$version-$rid.tar
+        } else {
+            & ./build/7-zip/7za.exe a -ttar seqfwd-$version-$rid.tar ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/
             if($LASTEXITCODE -ne 0) { throw "failed" }
 
-			rm seqfwd-$version-$rid.tar
-		}
-	}
+            # Back to the original directory name
+            mv ./src/Seq.Forwarder/bin/Release/$framework/$rid/seqfwd-$version-$rid/ ./src/Seq.Forwarder/bin/Release/$framework/$rid/publish/
+            
+            & ./build/7-zip/7za.exe a -tgzip ./artifacts/seqfwd-$version-$rid.tar.gz seqfwd-$version-$rid.tar
+            if($LASTEXITCODE -ne 0) { throw "failed" }
+
+            rm seqfwd-$version-$rid.tar
+        }
+    }
 }
 
 Push-Location $PSScriptRoot
