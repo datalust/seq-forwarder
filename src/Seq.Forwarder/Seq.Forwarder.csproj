@@ -6,6 +6,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>CA1416</NoWarn>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Authors>Datalust Pty Ltd, Contributors</Authors>
     <Company>Datalust Pty Ltd</Company>
