@@ -81,7 +81,7 @@ namespace Seq.Forwarder.Config
 
             var dir = Path.GetDirectoryName(filename);
             if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+                Directory.CreateDirectory(dir!);
             
             var content = JsonConvert.SerializeObject(data, Formatting.Indented, SerializerSettings);
             File.WriteAllText(filename, content);

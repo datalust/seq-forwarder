@@ -41,7 +41,7 @@ namespace Seq.Forwarder.Cli.Commands
 
         public RunCommand()
         {
-            Options.Add("nologo", v => _noLogo = true);
+            Options.Add("nologo", _ => _noLogo = true);
             _storagePath = Enable<StoragePathFeature>();
             _listenUri = Enable<ListenUriFeature>();
         }
@@ -149,8 +149,7 @@ namespace Seq.Forwarder.Cli.Commands
             if (!string.IsNullOrWhiteSpace(internalLogServerUri))
                 loggerConfiguration.WriteTo.Seq(
                     internalLogServerUri,
-                    apiKey: internalLogServerApiKey,
-                    compact: true);
+                    apiKey: internalLogServerApiKey);
 
             return loggerConfiguration.CreateLogger();
         }
