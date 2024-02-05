@@ -36,10 +36,7 @@ namespace Seq.Forwarder.Cryptography
 
         public string Protect(string value)
         {
-            var salt = new byte[16];
-            using (var cp = new RNGCryptoServiceProvider())
-                cp.GetBytes(salt);
-
+            var salt = RandomNumberGenerator.GetBytes(16);
             var bytes = ProtectedData.Protect(Encoding.UTF8.GetBytes(value), salt, DataProtectionScope.LocalMachine);
             return $"{Convert.ToBase64String(bytes)}${Convert.ToBase64String(salt)}";
         }
