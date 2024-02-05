@@ -33,7 +33,7 @@ function Publish-Archives($version)
     foreach ($rid in $rids) {
         Write-Output "Publishing archive for $rid"
         
-        & dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
+        & dotnet publish src/Seq.Forwarder/Seq.Forwarder.csproj -c Release --self-contained -f $framework -r $rid /p:VersionPrefix=$version /p:SeqForwarderRid=$rid
         if($LASTEXITCODE -ne 0) { throw "failed" }
 
         # Make sure the archive contains a reasonable root filename
