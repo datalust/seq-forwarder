@@ -2,7 +2,7 @@
   "profiles": {
     "Seq.Forwarder": {
       "commandName": "Project",
-      "commandLineArgs": "run"
+      "commandLineArgs": "run --listen=https://example.datalust.co:45341"
     }
   }
 }
