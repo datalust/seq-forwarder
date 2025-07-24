@@ -1,5 +1,17 @@
 # Seq Forwarder [![Build status](https://ci.appveyor.com/api/projects/status/qdvdn50xqwi43jkm?svg=true)](https://ci.appveyor.com/project/datalust/seq-forwarder) [![Join the chat at https://gitter.im/datalust/seq](https://img.shields.io/gitter/room/datalust/seq.svg)](https://gitter.im/datalust/seq) [![Download](https://img.shields.io/github/release/datalust/seq-forwarder.svg)](https://github.com/datalust/seq-forwarder/releases)
 
+> [!NOTE]
+>
+> **Seq Forwarder has moved!** The forwarder commands are now available in `seqcli`, as the `seqcli forwarder` command group.
+>
+> https://github.com/datalust/seqcli?tab=readme-ov-file#store-and-forward-ingestion-proxy-preview
+>
+> You'll currently need to use a preview version of `seqcli` (the `datalust/seqcli:preview` Docker container, or pass `--prerelease`
+> to `dotnet tool install`), as well as supply the `--pre` flag on the command line when invoking `seqcli forwarder` commands.
+>
+> Feedback and bug reports are welcome and appreciated in the `datalust/seqcli` issue tracker. Thanks everyone who contributed
+> to the standalone Seq Forwarder! 😎
+
 Seq Forwarder is a client-side log collector that receives events over its local HTTP API and persists them to its own 
 internal storage until a remote Seq server can be reached.
 
